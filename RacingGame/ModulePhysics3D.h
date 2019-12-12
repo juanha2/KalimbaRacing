@@ -11,6 +11,8 @@
 
 class DebugDrawer;
 class  PhysBody3D;
+struct PhysVehicle3D;
+struct VehicleInfo;
 
 class ModulePhysics3D : public Module
 {
@@ -29,20 +31,24 @@ public:
 	void RemoveBodyFromWorld(btRigidBody* body);
 
 	PhysBody3D* RayCast(const vec3& Origin, const vec3& Direction, vec3& HitPoint = vec3());
-
-	//TODO 1: Implement the code to add a Point to Point constraint ( btPoint2PointConstraint )
-	//void AddConstraintP2P(const Primitive& bodyA, const Primitive& bodyB, ...);
-
-	//TODO 3: Implement the code to add a Hinge constraint ( btHingeConstraint )
-	//void AddConstraintHinge(const Primitive & bodyA, const Primitive & bodyB, ...);
+	PhysVehicle3D* AddVehicle(const VehicleInfo& info);
 
 private:
+
 	btDefaultCollisionConfiguration*	collision_conf;
 	btCollisionDispatcher*				dispatcher;
 	btBroadphaseInterface*				broad_phase;
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld*			world;
 	DebugDrawer*						debug_draw;
+
+	//New Lists
+	p2List<btDefaultMotionState*>		motions;
+	p2List<btCollisionShape*>			shapes;
+
+	//Vehicle variables ----------------------------------
+	btDefaultVehicleRaycaster*			vehicle_raycaster;
+	PhysVehicle3D*						phys_vehicle;
 };
 
 class DebugDrawer : public btIDebugDraw

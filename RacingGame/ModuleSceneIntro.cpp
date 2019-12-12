@@ -20,26 +20,25 @@ bool ModuleSceneIntro::Start()
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));
 
-	const int SnakeLength = 7;
-	const float StartingSize = 0.5f;
-	const float SizeIncrement = 0.2f;
-	const float BallDistance = 0.3f;
+	//const int SnakeLength = 7;
+	//const float StartingSize = 0.5f;
+	//const float SizeIncrement = 0.2f;
+	//const float BallDistance = 0.3f;
 
-	float XPos = 0.f;
-	float Size = StartingSize;
-	for (int n = 0; n < SnakeLength; n++)
-	{
-		Sphere* s = new Sphere(Size);
-		primitives.PushBack(s);
-		s->SetPos(XPos, 10.f, 2.5f);
+	//float XPos = 0.f;
+	//float Size = StartingSize;
+	//for (int n = 0; n < SnakeLength; n++)
+	//{
+	//	Sphere* s = new Sphere(Size);
+	//	primitives.PushBack(s);
+	//	s->SetPos(XPos, 10.f, 2.5f);
 
-		//TODO 2: Link all the spheres with your P2P constraints
+	//	//TODO 2: Link all the spheres with your P2P constraints
 
-		XPos += Size + Size + SizeIncrement + BallDistance;
-		Size += SizeIncrement;
-	}
-
-	//TODO 4: Link some other spheres with your Hinge constraint
+	//	XPos += Size + Size + SizeIncrement + BallDistance;
+	//	Size += SizeIncrement;
+	//}
+	
 
 	return ret;
 }
@@ -69,11 +68,7 @@ void ModuleSceneIntro::HandleDebugInput()
 
 	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN)
 	{
-		//TODO: NEW CODE
-		//A snippet of new code that may be useful for you. Nothing to do here really
-
-
-		//Get a vector indicating the direction from the camera viewpoint to the "mouse"
+		
 		const vec2 mousePos(((float)App->input->GetMouseX() / (float)App->window->Width()) * 2.f - 1.f,
 			-((float)App->input->GetMouseY() / (float)App->window->Height()) * 2.f + 1.f);
 		const vec4 rayEye = inverse(App->renderer3D->ProjectionMatrix) * vec4(mousePos.x, mousePos.y, -1.f, 1.f);

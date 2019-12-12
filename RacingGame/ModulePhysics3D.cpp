@@ -3,17 +3,17 @@
 #include "ModulePhysics3D.h"
 #include "PhysBody3D.h"
 #include "Primitive.h"
-
+#include "PhysVehicle3D.h"
 #include "glut/glut.h"
 
 #ifdef _DEBUG
-	#pragma comment (lib, "Bullet/libx86/BulletDynamics_debug.lib")
-	#pragma comment (lib, "Bullet/libx86/BulletCollision_debug.lib")
-	#pragma comment (lib, "Bullet/libx86/LinearMath_debug.lib")
+#pragma comment (lib, "Bullet/libx86/BulletDynamics_debug.lib")
+#pragma comment (lib, "Bullet/libx86/BulletCollision_debug.lib")
+#pragma comment (lib, "Bullet/libx86/LinearMath_debug.lib")
 #else
-	#pragma comment (lib, "Bullet/libx86/BulletDynamics.lib")
-	#pragma comment (lib, "Bullet/libx86/BulletCollision.lib")
-	#pragma comment (lib, "Bullet/libx86/LinearMath.lib")
+#pragma comment (lib, "Bullet/libx86/BulletDynamics.lib")
+#pragma comment (lib, "Bullet/libx86/BulletCollision.lib")
+#pragma comment (lib, "Bullet/libx86/LinearMath.lib")
 #endif
 
 ModulePhysics3D::ModulePhysics3D(bool start_enabled) : Module(start_enabled), world(nullptr)
@@ -63,12 +63,15 @@ bool ModulePhysics3D::Start()
 		startTransform.setFromOpenGLMatrix(&glMatrix);
 
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		motions.add(myMotionState);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f, myMotionState, colShape);
 
 		btRigidBody* body = new btRigidBody(rbInfo);
 		world->addRigidBody(body);
 	}
 
+	//Vehicle inicializations
+	vehicle_raycaster = new btDefaultVehicleRaycaster(world);
 	return true;
 }
 
@@ -129,21 +132,30 @@ bool ModulePhysics3D::CleanUp()
 	LOG("Destroying 3D Physics simulation");
 
 	// Remove from the world all collision bodies
-	for(int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
+	for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
 	{
 		btCollisionObject* obj = world->getCollisionObjectArray()[i];
 		world->removeCollisionObject(obj);
 	}
 
+	// Clear motions 
+	for (p2List_item<btDefaultMotionState*>* item = motions.getFirst(); item; item = item->next)
+		delete item->data;
+
+	motions.clear();
+
+	//TODO REMOVE CONSTRAINTS
+
+	delete phys_vehicle;
+	delete vehicle_raycaster;
 	delete world;
 
 	return true;
 }
 
-PhysBody3D * ModulePhysics3D::RayCast(const vec3 & Origin, const vec3 & Direction, vec3& HitPoint)
+PhysBody3D* ModulePhysics3D::RayCast(const vec3& Origin, const vec3& Direction, vec3& HitPoint)
 {
-	//TODO: NEW CODE
-	//A snippet of new code that may be useful for you. Nothing to do here really
+
 	vec3 Dir = normalize(Direction);
 
 	btVector3 Start = btVector3(Origin.x, Origin.y, Origin.z);
@@ -161,12 +173,12 @@ PhysBody3D * ModulePhysics3D::RayCast(const vec3 & Origin, const vec3 & Directio
 	return nullptr;
 }
 
-void ModulePhysics3D::AddBodyToWorld(btRigidBody * body)
+void ModulePhysics3D::AddBodyToWorld(btRigidBody* body)
 {
 	world->addRigidBody(body);
 }
 
-void ModulePhysics3D::RemoveBodyFromWorld(btRigidBody * body)
+void ModulePhysics3D::RemoveBodyFromWorld(btRigidBody* body)
 {
 	world->removeRigidBody(body);
 }
@@ -199,10 +211,137 @@ void DebugDrawer::draw3dText(const btVector3& location, const char* textString)
 
 void DebugDrawer::setDebugMode(int debugMode)
 {
-	mode = (DebugDrawModes) debugMode;
+	mode = (DebugDrawModes)debugMode;
 }
 
 int	 DebugDrawer::getDebugMode() const
 {
 	return mode;
+}
+
+// ---------------------------------------------------------
+PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
+{
+	/*
+	// We create the compound shape -------------------------
+	btCompoundShape* comShape = new btCompoundShape();
+	mat4x4 glMatrix = IdentityMatrix;
+	btTransform startTransform;
+	startTransform.setFromOpenGLMatrix(&glMatrix);
+
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f, myMotionState, comShape);
+
+	btRigidBody* body = new btRigidBody(rbInfo);
+	world->addRigidBody(body);
+	//-------------------------------------------------------
+
+	// We create the chassis as a child of compound shape -------------------------
+	btCollisionShape* colShape = new btBoxShape(btVector3(info.chassis_size.x * 0.5f, info.chassis_size.y * 0.5f, info.chassis_size.z * 0.5f));
+
+	btTransform trans;
+	trans.setIdentity();
+	trans.setOrigin(btVector3(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z));
+
+	btRigidBody::btRigidBodyConstructionInfo rbInfoChassis(0.0f, myMotionState, colShape);
+	btRigidBody* bodyChassis = new btRigidBody(rbInfoChassis);
+
+	world->addRigidBody(bodyChassis);
+	comShape->addChildShape(trans, colShape);
+	//-------------------------------------------------
+
+	btTransform startTransform;
+	startTransform.setIdentity();
+
+	btVector3 localInertia(0, 0, 0);
+	comShape->calculateLocalInertia(info.mass, localInertia);
+
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(info.mass, myMotionState, comShape, localInertia);
+
+	btRigidBody* body = new btRigidBody(rbInfo);
+	body->setContactProcessingThreshold(BT_LARGE_FLOAT);
+	body->setActivationState(DISABLE_DEACTIVATION);
+
+	world->addRigidBody(body);
+
+	btRaycastVehicle::btVehicleTuning tuning;
+	tuning.m_frictionSlip = info.frictionSlip;
+	tuning.m_maxSuspensionForce = info.maxSuspensionForce;
+	tuning.m_maxSuspensionTravelCm = info.maxSuspensionTravelCm;
+	tuning.m_suspensionCompression = info.suspensionCompression;
+	tuning.m_suspensionDamping = info.suspensionDamping;
+	tuning.m_suspensionStiffness = info.suspensionStiffness;
+
+	btRaycastVehicle* vehicle = new btRaycastVehicle(tuning, body, vehicle_raycaster);
+
+	vehicle->setCoordinateSystem(0, 1, 2);
+
+	for (int i = 0; i < info.num_wheels; ++i)
+	{
+		btVector3 conn(info.wheels[i].connection.x, info.wheels[i].connection.y, info.wheels[i].connection.z);
+		btVector3 dir(info.wheels[i].direction.x, info.wheels[i].direction.y, info.wheels[i].direction.z);
+		btVector3 axis(info.wheels[i].axis.x, info.wheels[i].axis.y, info.wheels[i].axis.z);
+
+		vehicle->addWheel(conn, dir, axis, info.wheels[i].suspensionRestLength, info.wheels[i].radius, tuning, info.wheels[i].front);
+	}
+	// ---------------------
+
+	PhysVehicle3D* pvehicle = new PhysVehicle3D(body, vehicle, info);
+	world->addVehicle(vehicle);
+	vehicles.add(pvehicle);
+
+	return pvehicle;*/
+	btCompoundShape* comShape = new btCompoundShape();
+
+	btCollisionShape* colShape = new btBoxShape(btVector3(info.chassis_size.x * 0.5f, info.chassis_size.y * 0.5f, info.chassis_size.z * 0.5f));
+
+	btTransform trans;
+	trans.setIdentity();
+	trans.setOrigin(btVector3(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z));
+
+	comShape->addChildShape(trans, colShape);
+
+	btTransform startTransform;
+	startTransform.setIdentity();
+
+	btVector3 localInertia(0, 0, 0);
+	comShape->calculateLocalInertia(info.mass, localInertia);
+
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	motions.add(myMotionState);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(info.mass, myMotionState, comShape, localInertia);
+
+	btRigidBody* body = new btRigidBody(rbInfo);
+	body->setContactProcessingThreshold(BT_LARGE_FLOAT);
+	body->setActivationState(DISABLE_DEACTIVATION);
+
+	world->addRigidBody(body);
+
+	btRaycastVehicle::btVehicleTuning tuning;
+	tuning.m_frictionSlip = info.frictionSlip;
+	tuning.m_maxSuspensionForce = info.maxSuspensionForce;
+	tuning.m_maxSuspensionTravelCm = info.maxSuspensionTravelCm;
+	tuning.m_suspensionCompression = info.suspensionCompression;
+	tuning.m_suspensionDamping = info.suspensionDamping;
+	tuning.m_suspensionStiffness = info.suspensionStiffness;
+
+	btRaycastVehicle* vehicle = new btRaycastVehicle(tuning, body, vehicle_raycaster);
+
+	vehicle->setCoordinateSystem(0, 1, 2);
+
+	for (int i = 0; i < info.num_wheels; ++i)
+	{
+		btVector3 conn(info.wheels[i].connection.x, info.wheels[i].connection.y, info.wheels[i].connection.z);
+		btVector3 dir(info.wheels[i].direction.x, info.wheels[i].direction.y, info.wheels[i].direction.z);
+		btVector3 axis(info.wheels[i].axis.x, info.wheels[i].axis.y, info.wheels[i].axis.z);
+
+		vehicle->addWheel(conn, dir, axis, info.wheels[i].suspensionRestLength, info.wheels[i].radius, tuning, info.wheels[i].front);
+	}
+	// ---------------------
+
+	phys_vehicle = new PhysVehicle3D(body, vehicle, info);
+	world->addAction(vehicle);
+
+	return phys_vehicle;
 }
