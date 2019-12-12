@@ -283,3 +283,9 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 
 	return phys_vehicle;
 }
+
+PhysVehicle3D* ModulePhysics3D::GetVehicle()const
+{
+	return phys_vehicle;
+}
+

@@ -32,7 +32,7 @@ public:
 
 	PhysBody3D* RayCast(const vec3& Origin, const vec3& Direction, vec3& HitPoint = vec3());
 	PhysVehicle3D* AddVehicle(const VehicleInfo& info);
-
+	PhysVehicle3D* GetVehicle()const;
 private:
 
 	btDefaultCollisionConfiguration*	collision_conf;

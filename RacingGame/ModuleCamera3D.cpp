@@ -1,6 +1,8 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleCamera3D.h"
+#include "ModulePhysics3D.h"
+#include "PhysVehicle3D.h"
 
 ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 {
@@ -22,6 +24,7 @@ bool ModuleCamera3D::Start()
 {
 	LOG("Setting up the camera");
 	bool ret = true;
+	debugcamera = true;
 
 	return ret;
 }
@@ -30,71 +33,111 @@ bool ModuleCamera3D::Start()
 bool ModuleCamera3D::CleanUp()
 {
 	LOG("Cleaning camera");
-
 	return true;
 }
 
 // -----------------------------------------------------------------
 update_status ModuleCamera3D::Update(float dt)
 {
-	// Implement a debug camera with keys and mouse
-	// Now we can make this movememnt frame rate independant!
-
-	vec3 newPos(0,0,0);
-	float speed = 3.0f * dt;
-	if(App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
-		speed = 8.0f * dt;
-
-	if(App->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += speed;
-	if(App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= speed;
-
-	if(App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) newPos -= Z * speed;
-	if(App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) newPos += Z * speed;
-
-
-	if(App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) newPos -= X * speed;
-	if(App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) newPos += X * speed;
-
-	Position += newPos;
-	Reference += newPos;
-
-	// Mouse motion ----------------
-
-	if(App->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
+	if (debugcamera)
 	{
-		int dx = -App->input->GetMouseXMotion();
-		int dy = -App->input->GetMouseYMotion();
+		// Implement a debug camera with keys and mouse
+		// Now we can make this movememnt frame rate independant!
 
-		float Sensitivity = 0.25f;
+		vec3 newPos(0, 0, 0);
+		float speed = 3.0f * dt;
+		if (App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+			speed = 8.0f * dt;
 
-		Position -= Reference;
+		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += speed;
+		if (App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= speed;
 
-		if(dx != 0)
+		if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) newPos -= Z * speed;
+		if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) newPos += Z * speed;
+
+
+		if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) newPos -= X * speed;
+		if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) newPos += X * speed;
+
+		Position += newPos;
+		Reference += newPos;
+
+		// Mouse motion ----------------
+
+		if (App->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
 		{
-			float DeltaX = (float)dx * Sensitivity;
+			int dx = -App->input->GetMouseXMotion();
+			int dy = -App->input->GetMouseYMotion();
 
-			X = rotate(X, DeltaX, vec3(0.0f, 1.0f, 0.0f));
-			Y = rotate(Y, DeltaX, vec3(0.0f, 1.0f, 0.0f));
-			Z = rotate(Z, DeltaX, vec3(0.0f, 1.0f, 0.0f));
-		}
+			float Sensitivity = 0.25f;
 
-		if(dy != 0)
-		{
-			float DeltaY = (float)dy * Sensitivity;
+			Position -= Reference;
 
-			Y = rotate(Y, DeltaY, X);
-			Z = rotate(Z, DeltaY, X);
-
-			if(Y.y < 0.0f)
+			if (dx != 0)
 			{
-				Z = vec3(0.0f, Z.y > 0.0f ? 1.0f : -1.0f, 0.0f);
-				Y = cross(Z, X);
+				float DeltaX = (float)dx * Sensitivity;
+
+				X = rotate(X, DeltaX, vec3(0.0f, 1.0f, 0.0f));
+				Y = rotate(Y, DeltaX, vec3(0.0f, 1.0f, 0.0f));
+				Z = rotate(Z, DeltaX, vec3(0.0f, 1.0f, 0.0f));
 			}
+
+			if (dy != 0)
+			{
+				float DeltaY = (float)dy * Sensitivity;
+
+				Y = rotate(Y, DeltaY, X);
+				Z = rotate(Z, DeltaY, X);
+
+				if (Y.y < 0.0f)
+				{
+					Z = vec3(0.0f, Z.y > 0.0f ? 1.0f : -1.0f, 0.0f);
+					Y = cross(Z, X);
+				}
+			}
+
+			Position = Reference + Z * length(Position);
 		}
-
-		Position = Reference + Z * length(Position);
 	}
+	else
+	{
 
+		//actual driving camera
+		//the camera has a focus point that is an imaginary point in front of the car
+		//it also has a target position that the camera wants to be in that is behind the car
+		//the camera moves to the target pos while keeps the focus in the target
+
+		vec3 newPos(0, 0, 0);
+		float speed = 3.0f * dt;
+		PhysVehicle3D* vehicle= App->physics->GetVehicle();
+		
+		btTransform trans_focus_point;
+		btTransform trans_newpos_cam; 
+		trans_focus_point= trans_newpos_cam = vehicle->vehicle->getChassisWorldTransform();
+
+		trans_focus_point.setOrigin(trans_focus_point.getOrigin()+(vehicle->vehicle->getForwardVector()*10));//gets a position in front of the car //the scalar determines how far away from the car it is
+		trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position behind the car //the scalar determines how far away from the car it is
+
+		LookAt({ trans_focus_point.getOrigin().getX(),trans_focus_point.getOrigin().getY(),trans_focus_point.getOrigin().getZ()});
+		
+		/*btVector3 direction_to_target;
+		direction_to_target.setX(trans_newpos_cam.getOrigin().getX()-Position.x);
+		direction_to_target.setY(trans_newpos_cam.getOrigin().getY() - Position.y);
+		direction_to_target.setZ(trans_newpos_cam.getOrigin().getZ() - Position.z);
+		btScalar distance_to_target= direction_to_target.length();
+		direction_to_target.normalize();
+		vec3 dir = { direction_to_target.getX(), direction_to_target.getX(), direction_to_target.getX() };
+		Position += dir *distance_to_target* dt * 0.5;*/
+		vec3 finalpos = { trans_newpos_cam.getOrigin().x(), trans_newpos_cam.getOrigin().y() + 5,trans_newpos_cam.getOrigin().z() };
+		btVector3 dist({ finalpos.x - Position.x,finalpos.y - Position.y ,finalpos.z - Position.z });
+		btScalar modu =dist.length2();
+		dist.normalize();
+	
+
+		Position += {dist.getX()*dt*modu, dist.getY()*dt*modu, dist.getZ()*dt*modu };//todo change the scalars to customizable variables
+
+		
+	}
 	return UPDATE_CONTINUE;
 }
 

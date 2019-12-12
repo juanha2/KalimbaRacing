@@ -96,6 +96,10 @@ void ModuleSceneIntro::DebugSpawnPrimitive(Primitive * p)
 // Update
 update_status ModuleSceneIntro::Update(float dt)
 {
+	//TODO move the camera debug mode to the handle inmput function, jsut activate the camera debug property when in debug
+	if (App->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN)
+		App->camera->debugcamera = !App->camera->debugcamera;
+
 	Plane p(vec3(0, 1, 0));
 	p.axis = true;
 	p.Render();
