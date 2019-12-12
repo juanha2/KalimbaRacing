@@ -44,7 +44,7 @@ private:
 
 	//New Lists
 	p2List<btDefaultMotionState*>		motions;
-	p2List<btCollisionShape*>			shapes;
+	p2List<btCollisionShape*>			shapes;	
 
 	//Vehicle variables ----------------------------------
 	btDefaultVehicleRaycaster*			vehicle_raycaster;
