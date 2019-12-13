@@ -107,8 +107,6 @@ update_status ModuleCamera3D::Update(float dt)
 		//it also has a target position that the camera wants to be in that is behind the car
 		//the camera moves to the target pos while keeps the focus in the target
 
-		vec3 newPos(0, 0, 0);
-		float speed = 3.0f * dt;
 		PhysVehicle3D* vehicle= App->physics->GetVehicle();
 		
 		btTransform trans_focus_point;

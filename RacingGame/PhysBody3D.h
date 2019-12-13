@@ -36,10 +36,13 @@ public:
 
 private:
 	void SetBody(btCollisionShape* shape, Primitive* parent, float mass);
+	void SetAsSensor(bool is_sensor);
 
 	btRigidBody* body;
 	btCollisionShape* colShape;
 	btDefaultMotionState* motionState;
+
+	bool is_sensor=false;
 public:
 	Primitive* parentPrimitive;
 	p2DynArray<Module*> collision_listeners;

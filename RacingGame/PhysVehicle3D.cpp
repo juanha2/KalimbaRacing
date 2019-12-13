@@ -26,7 +26,7 @@ void PhysVehicle3D::Render()
 
 	for (int i = 0; i < vehicle->getNumWheels(); ++i)
 	{		
-		Cylinder wheel(info.wheels[0].radius, info.wheels[0].width);
+		Cylinder wheel(info.wheels[i].radius, info.wheels[0].width);
 		wheel.color = Blue;
 		vehicle->updateWheelTransform(i);
 		vehicle->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(&wheel.transform);

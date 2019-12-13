@@ -227,18 +227,56 @@ int	 DebugDrawer::getDebugMode() const
 // ---------------------------------------------------------
 PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 {	
+	//Creation of the chasis 
 	btCompoundShape* comShape = new btCompoundShape();
 	shapes.add(comShape);
+	
+	//------------------------------------------------------
+	btCollisionShape* mainShape = new btBoxShape(btVector3(info.chassis_size.x * 0.5f, info.chassis_size.y * 0.5f, info.chassis_size.z * 0.5f));
+	shapes.add(mainShape);
 
-	btCollisionShape* colShape = new btBoxShape(btVector3(info.chassis_size.x * 0.5f, info.chassis_size.y * 0.5f, info.chassis_size.z * 0.5f));
-	shapes.add(colShape);
+	btTransform mainTrans;
+	mainTrans.setIdentity();
+	mainTrans.setOrigin(btVector3(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z));
 
-	btTransform trans;
-	trans.setIdentity();
-	trans.setOrigin(btVector3(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z));
+	comShape->addChildShape(mainTrans, mainShape);
+	//------------------------------------------------------
+	btCollisionShape* mudguardShape = new btBoxShape(btVector3( 1.5* 0.5f,  0.5* 0.5f,  1.75f* 0.5f));
+	shapes.add(mudguardShape);
 
-	comShape->addChildShape(trans, colShape);
+	btTransform mudguardTrans;
+	mudguardTrans.setIdentity();
+	mudguardTrans.setOrigin(btVector3(0,1.4f, -0.5f));
 
+	comShape->addChildShape(mudguardTrans, mudguardShape);
+	//------------------------------------------------------
+	btCollisionShape* flapShape = new btBoxShape(btVector3(2.3f * 0.5f,  0.075f* 0.5f,  0.3f* 0.5f));
+	shapes.add(flapShape);
+
+	btTransform flapTrans;
+	flapTrans.setIdentity();
+	flapTrans.setOrigin(btVector3(0,1.5f, -1.7f));
+
+	comShape->addChildShape(flapTrans, flapShape);
+	////------------------------------------------------------	
+	//btCollisionShape* barleftShape = new btBoxShape(btVector3(1.5 * 0.5f, 0.5 * 0.5f, 1.75f * 0.5f));
+	//shapes.add(barleftShape);
+
+	//btTransform barleftTrans;
+	//barleftTrans.setIdentity();
+	//barleftTrans.setOrigin(btVector3(0, 4, -0.5f));
+
+	//comShape->addChildShape(barleftTrans, barleftShape);
+	////------------------------------------------------------
+	//btCollisionShape* barrightShape = new btBoxShape(btVector3(1.5 * 0.5f, 0.5 * 0.5f, 1.75f * 0.5f));
+	//shapes.add(barrightShape);
+
+	//btTransform barrightTrans;
+	//barrightTrans.setIdentity();
+	//barrightTrans.setOrigin(btVector3(0, 6, -0.5f));
+
+	//comShape->addChildShape(barrightTrans, barrightShape);
+	////------------------------------------------------------
 	btTransform startTransform;
 	startTransform.setIdentity();
 
@@ -252,7 +290,6 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	btRigidBody* body = new btRigidBody(rbInfo);
 	body->setContactProcessingThreshold(BT_LARGE_FLOAT);
 	body->setActivationState(DISABLE_DEACTIVATION);
-
 	world->addRigidBody(body);
 
 	btRaycastVehicle::btVehicleTuning tuning;
@@ -288,4 +325,3 @@ PhysVehicle3D* ModulePhysics3D::GetVehicle()const
 {
 	return phys_vehicle;
 }
-
