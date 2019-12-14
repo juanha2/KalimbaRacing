@@ -230,53 +230,57 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	//Creation of the chasis 
 	btCompoundShape* comShape = new btCompoundShape();
 	shapes.add(comShape);
-	
-	//------------------------------------------------------
-	btCollisionShape* mainShape = new btBoxShape(btVector3(info.chassis_size.x * 0.5f, info.chassis_size.y * 0.5f, info.chassis_size.z * 0.5f));
+
+	//Creation of the main Shape ------------------------
+	btCollisionShape* mainShape = new btBoxShape(btVector3(info.chassis[0].chassis_size.x * 0.5f, info.chassis[0].chassis_size.y * 0.5f, info.chassis[0].chassis_size.z * 0.5f));
 	shapes.add(mainShape);
 
 	btTransform mainTrans;
 	mainTrans.setIdentity();
-	mainTrans.setOrigin(btVector3(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z));
+	mainTrans.setOrigin(btVector3(info.chassis[0].chassis_offset.x, info.chassis[0].chassis_offset.y, info.chassis[0].chassis_offset.z));
 
 	comShape->addChildShape(mainTrans, mainShape);
-	//------------------------------------------------------
-	btCollisionShape* mudguardShape = new btBoxShape(btVector3( 1.5* 0.5f,  0.5* 0.5f,  1.75f* 0.5f));
-	shapes.add(mudguardShape);
 
-	btTransform mudguardTrans;
-	mudguardTrans.setIdentity();
-	mudguardTrans.setOrigin(btVector3(0,1.4f, -0.5f));
+	//Creation of the cabin Shape ---------------------
+	btCollisionShape* cabinShape = new btBoxShape(btVector3(info.chassis[1].chassis_size.x * 0.5f, info.chassis[1].chassis_size.y * 0.5f, info.chassis[1].chassis_size.z * 0.5f));
+	shapes.add(cabinShape);
 
-	comShape->addChildShape(mudguardTrans, mudguardShape);
-	//------------------------------------------------------
-	btCollisionShape* flapShape = new btBoxShape(btVector3(2.3f * 0.5f,  0.075f* 0.5f,  0.3f* 0.5f));
+	btTransform cabinTrans;
+	cabinTrans.setIdentity();
+	cabinTrans.setOrigin(btVector3(info.chassis[1].chassis_offset.x, info.chassis[1].chassis_offset.y, info.chassis[1].chassis_offset.z));
+
+	comShape->addChildShape(cabinTrans, cabinShape);
+
+	//Creation of the flap Shape -------------------------
+	btCollisionShape* flapShape = new btBoxShape(btVector3(info.chassis[2].chassis_size.x * 0.5f, info.chassis[2].chassis_size.y * 0.5f, info.chassis[2].chassis_size.z * 0.5f));
 	shapes.add(flapShape);
 
 	btTransform flapTrans;
 	flapTrans.setIdentity();
-	flapTrans.setOrigin(btVector3(0,1.5f, -1.7f));
+	flapTrans.setOrigin(btVector3(info.chassis[2].chassis_offset.x, info.chassis[2].chassis_offset.y, info.chassis[2].chassis_offset.z));
 
 	comShape->addChildShape(flapTrans, flapShape);
-	////------------------------------------------------------	
-	//btCollisionShape* barleftShape = new btBoxShape(btVector3(1.5 * 0.5f, 0.5 * 0.5f, 1.75f * 0.5f));
-	//shapes.add(barleftShape);
 
-	//btTransform barleftTrans;
-	//barleftTrans.setIdentity();
-	//barleftTrans.setOrigin(btVector3(0, 4, -0.5f));
+	//Creation of the bar left Shape -------------------------
+	btCollisionShape* barleftShape = new btBoxShape(btVector3(info.chassis[3].chassis_size.x * 0.5f, info.chassis[3].chassis_size.y * 0.5f, info.chassis[3].chassis_size.z * 0.5f));
+	shapes.add(barleftShape);
 
-	//comShape->addChildShape(barleftTrans, barleftShape);
-	////------------------------------------------------------
-	//btCollisionShape* barrightShape = new btBoxShape(btVector3(1.5 * 0.5f, 0.5 * 0.5f, 1.75f * 0.5f));
-	//shapes.add(barrightShape);
+	btTransform barleftTrans;
+	barleftTrans.setIdentity();
+	barleftTrans.setOrigin(btVector3(info.chassis[3].chassis_offset.x, info.chassis[3].chassis_offset.y, info.chassis[3].chassis_offset.z));
 
-	//btTransform barrightTrans;
-	//barrightTrans.setIdentity();
-	//barrightTrans.setOrigin(btVector3(0, 6, -0.5f));
+	comShape->addChildShape(barleftTrans, barleftShape);
 
-	//comShape->addChildShape(barrightTrans, barrightShape);
-	////------------------------------------------------------
+	//Creation of the bar right Shape -------------------------
+	btCollisionShape* barrightShape = new btBoxShape(btVector3(info.chassis[4].chassis_size.x * 0.5f, info.chassis[4].chassis_size.y * 0.5f, info.chassis[4].chassis_size.z * 0.5f));
+	shapes.add(barrightShape);
+
+	btTransform barrightTrans;
+	barrightTrans.setIdentity();
+	barrightTrans.setOrigin(btVector3(info.chassis[4].chassis_offset.x, info.chassis[4].chassis_offset.y, info.chassis[4].chassis_offset.z));
+
+	comShape->addChildShape(barrightTrans, barrightShape);
+	//------------------------------------------------------
 	btTransform startTransform;
 	startTransform.setIdentity();
 

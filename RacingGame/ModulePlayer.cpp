@@ -21,9 +21,7 @@ bool ModulePlayer::Start()
 
 	VehicleInfo car;
 
-	// Car properties ----------------------------------------
-	car.chassis_size.Set(2.5f, 0.80f, 4);
-	car.chassis_offset.Set(0, 0.85f, 0);
+	// Car properties ----------------------------------------	
 	car.mass = 500.0f;
 	car.suspensionStiffness = 15.88f;
 	car.suspensionCompression = 0.83f;
@@ -31,6 +29,36 @@ bool ModulePlayer::Start()
 	car.maxSuspensionTravelCm = 1000.0f;
 	car.frictionSlip = 50.5;
 	car.maxSuspensionForce = 6000.0f;
+
+	// Chassis properties ---------------------------------------
+
+	car.num_chassis = 5;
+	car.chassis = new Chassis[5];
+
+	// MAIN CHASSIS -------------------------------------------
+	car.chassis[0].chassis_size.Set(2.2f, 0.80f, 4);
+	car.chassis[0].chassis_offset.Set(0, 0.85f, 0);
+	car.chassis[0].chassis_color = Yellow;
+
+	// CABIN CHASSIS -------------------------------------------
+	car.chassis[1].chassis_size.Set(1.5f, 0.50f, 1.75f);
+	car.chassis[1].chassis_offset.Set(0, 1.4f, -0.5f);
+	car.chassis[1].chassis_color = White;
+
+	// FLAP CHASSIS -------------------------------------------
+	car.chassis[2].chassis_size.Set(2.3f, 0.075f, 0.3f);
+	car.chassis[2].chassis_offset.Set(0, 1.5f, -1.7f);
+	car.chassis[2].chassis_color = Green;
+
+	// FLAP LEFT CHASSIS -------------------------------------------
+	car.chassis[3].chassis_size.Set(0.1f, 0.3f, 0.15f);
+	car.chassis[3].chassis_offset.Set(-0.75f, 1.35f, -1.7f);
+	car.chassis[3].chassis_color = Green;
+
+	// FLAP RIGHT CHASSIS -------------------------------------------
+	car.chassis[4].chassis_size.Set(0.1f, 0.3f, 0.15f);
+	car.chassis[4].chassis_offset.Set(0.75f, 1.35f, -1.7f);
+	car.chassis[4].chassis_color = Green;
 
 	// Wheel properties ---------------------------------------
 	float connection_height = 1.2f;
@@ -40,8 +68,8 @@ bool ModulePlayer::Start()
 
 	// Don't change anything below this line ------------------
 
-	float half_width = car.chassis_size.x * 0.5f;
-	float half_length = car.chassis_size.z * 0.5f;
+	float half_width = car.chassis[0].chassis_size.x * 0.5f;
+	float half_length = car.chassis[0].chassis_size.z * 0.5f;
 
 	vec3 direction(0, -1, 0);
 	vec3 axis(-1, 0, 0);
