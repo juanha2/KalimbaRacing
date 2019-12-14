@@ -107,17 +107,26 @@ update_status ModuleCamera3D::Update(float dt)
 		//it also has a target position that the camera wants to be in that is behind the car
 		//the camera moves to the target pos while keeps the focus in the target
 
-		PhysVehicle3D* vehicle= App->physics->GetVehicle();
-		
+		PhysVehicle3D* vehicle = App->physics->GetVehicle();
+
 		btTransform trans_focus_point;
-		btTransform trans_newpos_cam; 
-		trans_focus_point= trans_newpos_cam = vehicle->vehicle->getChassisWorldTransform();
+		btTransform trans_newpos_cam;
+		trans_focus_point = trans_newpos_cam = vehicle->vehicle->getChassisWorldTransform();
 
-		trans_focus_point.setOrigin(trans_focus_point.getOrigin()+(vehicle->vehicle->getForwardVector()*10));//gets a position in front of the car //the scalar determines how far away from the car it is
-		trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position behind the car //the scalar determines how far away from the car it is
+		if (vehicle->GetKmh() >= -10.0f)//if vehicle is going forward
+		{
+			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * 10));//gets a position in front of the car //the scalar determines how far away from the car it is
+			trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position behind the car //the scalar determines how far away from the car it is
 
-		LookAt({ trans_focus_point.getOrigin().getX(),trans_focus_point.getOrigin().getY(),trans_focus_point.getOrigin().getZ()});
-		
+		}
+		else
+		{
+			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position in front of the car //the scalar determines how far away from the car it is
+			trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * 10));//gets a position behind the car //the scalar determines how far away from the car it is
+		}
+
+		LookAt({ trans_focus_point.getOrigin().getX(),trans_focus_point.getOrigin().getY(),trans_focus_point.getOrigin().getZ() });
+
 		/*btVector3 direction_to_target;
 		direction_to_target.setX(trans_newpos_cam.getOrigin().getX()-Position.x);
 		direction_to_target.setY(trans_newpos_cam.getOrigin().getY() - Position.y);
@@ -128,19 +137,19 @@ update_status ModuleCamera3D::Update(float dt)
 		Position += dir *distance_to_target* dt * 0.5;*/
 		vec3 finalpos = { trans_newpos_cam.getOrigin().x(), trans_newpos_cam.getOrigin().y() + 5,trans_newpos_cam.getOrigin().z() };
 		btVector3 dist({ finalpos.x - Position.x,finalpos.y - Position.y ,finalpos.z - Position.z });
-		btScalar modu =dist.length2();
+		btScalar modu = dist.length2();
 		dist.normalize();
-	
 
-		Position += {dist.getX()*dt*modu, dist.getY()*dt*modu, dist.getZ()*dt*modu };//todo change the scalars to customizable variables
 
-		
+		Position += {dist.getX()* dt* modu, dist.getY()* dt* modu, dist.getZ()* dt* modu };//todo change the scalars to customizable variables
+
+
 	}
 	return UPDATE_CONTINUE;
 }
 
 // -----------------------------------------------------------------
-void ModuleCamera3D::Look(const vec3 &Position, const vec3 &Reference, bool RotateAroundReference)
+void ModuleCamera3D::Look(const vec3& Position, const vec3& Reference, bool RotateAroundReference)
 {
 	this->Position = Position;
 	this->Reference = Reference;
@@ -149,7 +158,7 @@ void ModuleCamera3D::Look(const vec3 &Position, const vec3 &Reference, bool Rota
 	X = normalize(cross(vec3(0.0f, 1.0f, 0.0f), Z));
 	Y = cross(Z, X);
 
-	if(!RotateAroundReference)
+	if (!RotateAroundReference)
 	{
 		this->Reference = this->Position;
 		this->Position += Z * 0.05f;
@@ -157,7 +166,7 @@ void ModuleCamera3D::Look(const vec3 &Position, const vec3 &Reference, bool Rota
 }
 
 // -----------------------------------------------------------------
-void ModuleCamera3D::LookAt( const vec3 &Spot)
+void ModuleCamera3D::LookAt(const vec3& Spot)
 {
 	Reference = Spot;
 
@@ -168,7 +177,7 @@ void ModuleCamera3D::LookAt( const vec3 &Spot)
 
 
 // -----------------------------------------------------------------
-void ModuleCamera3D::Move(const vec3 &Movement)
+void ModuleCamera3D::Move(const vec3& Movement)
 {
 	Position += Movement;
 	Reference += Movement;

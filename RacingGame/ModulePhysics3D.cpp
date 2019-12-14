@@ -69,6 +69,23 @@ bool ModulePhysics3D::Start()
 		btRigidBody* body = new btRigidBody(rbInfo);
 		world->addRigidBody(body);
 	}
+	// Big ramp as 2nd ground
+	{
+		btCollisionShape* colShape2 = new btBoxShape(btVector3(200.0f, 2.0f, 200.0f));
+
+		mat4x4 glMatrix2 = IdentityMatrix;
+		glMatrix2.translate(0.f, -2.f, -200.f);
+		glMatrix2.rotate(20.0f, { 1,0,0 });
+		btTransform startTransform2;
+		startTransform2.setFromOpenGLMatrix(&glMatrix2);
+
+		btDefaultMotionState* myMotionState2 = new btDefaultMotionState(startTransform2);
+		motions.add(myMotionState2);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo2(0.0f, myMotionState2, colShape2);
+
+		btRigidBody* body2 = new btRigidBody(rbInfo2);
+		world->addRigidBody(body2);
+	}
 
 	//Vehicle inicializations
 	vehicle_raycaster = new btDefaultVehicleRaycaster(world);

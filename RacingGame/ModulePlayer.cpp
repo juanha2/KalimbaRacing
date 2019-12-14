@@ -144,8 +144,12 @@ update_status ModulePlayer::Update(float dt)
 {
 	turn = acceleration = brake = 0.0f;
 
-	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT&& vehicle->GetKmh() < 100.0f)//only apply acceleration if vehicle is under 100 km/h
 	{
+		if (vehicle->GetKmh() < 0.0f)//if its going backwards first brake
+		{
+			brake = BRAKE_POWER;
+		}
 		acceleration = MAX_ACCELERATION;
 	}
 
@@ -160,12 +164,19 @@ update_status ModulePlayer::Update(float dt)
 		if (turn > -TURN_DEGREES)
 			turn -= TURN_DEGREES;
 	}
-
-	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT&&vehicle->GetKmh()>-30.0f)//only apply acceleration if vehicle is above -30 km/h
+	{
+		if (vehicle->GetKmh() > 0.0f)//if its going forward first brake
+		{
+			brake = BRAKE_POWER;
+		}
+		acceleration = -0.5*MAX_ACCELERATION;
+	}
+	
+	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_REPEAT)
 	{
 		brake = BRAKE_POWER;
 	}
-
 	vehicle->ApplyEngineForce(acceleration);
 	vehicle->Turn(turn);
 	vehicle->Brake(brake);
