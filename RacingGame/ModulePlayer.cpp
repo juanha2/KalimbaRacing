@@ -142,7 +142,13 @@ bool ModulePlayer::CleanUp()
 // Update: draw background
 update_status ModulePlayer::Update(float dt)
 {
-	turn = acceleration = brake = 0.0f;
+	acceleration = brake = 0.0f;
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_IDLE && App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_IDLE)//if not pressing turn slowly center the wheels
+	{
+		if (turn < -0.025f)turn += dt;
+		else if (turn > 0.025f)turn -= dt;
+		else turn = 0.0f;
+	}
 
 	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT&& vehicle->GetKmh() < 100.0f)//only apply acceleration if vehicle is under 100 km/h
 	{
@@ -156,13 +162,13 @@ update_status ModulePlayer::Update(float dt)
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
 		if (turn < TURN_DEGREES)
-			turn += TURN_DEGREES;
+			turn += TURN_DEGREES*dt*2;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 	{
 		if (turn > -TURN_DEGREES)
-			turn -= TURN_DEGREES;
+			turn -= TURN_DEGREES*dt*2;
 	}
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT&&vehicle->GetKmh()>-30.0f)//only apply acceleration if vehicle is above -30 km/h
 	{

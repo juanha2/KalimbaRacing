@@ -115,13 +115,13 @@ update_status ModuleCamera3D::Update(float dt)
 
 		if (vehicle->GetKmh() >= -10.0f)//if vehicle is going forward
 		{
-			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * 10));//gets a position in front of the car //the scalar determines how far away from the car it is
+			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * 5));//gets a position in front of the car //the scalar determines how far away from the car it is
 			trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position behind the car //the scalar determines how far away from the car it is
 
 		}
 		else
 		{
-			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * -10));//gets a position in front of the car //the scalar determines how far away from the car it is
+			trans_focus_point.setOrigin(trans_focus_point.getOrigin() + (vehicle->vehicle->getForwardVector() * -5));//gets a position in front of the car //the scalar determines how far away from the car it is
 			trans_newpos_cam.setOrigin(trans_newpos_cam.getOrigin() + (vehicle->vehicle->getForwardVector() * 10));//gets a position behind the car //the scalar determines how far away from the car it is
 		}
 
