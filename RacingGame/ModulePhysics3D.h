@@ -13,6 +13,7 @@ class DebugDrawer;
 class  PhysBody3D;
 struct PhysVehicle3D;
 struct VehicleInfo;
+struct Pillars;
 
 class ModulePhysics3D : public Module
 {
@@ -33,6 +34,9 @@ public:
 	PhysBody3D* RayCast(const vec3& Origin, const vec3& Direction, vec3& HitPoint = vec3());
 	PhysVehicle3D* AddVehicle(const VehicleInfo& info);
 	PhysVehicle3D* GetVehicle()const;
+
+	void CreateMap(const Pillars pillar_info[], float radius, int size, vec2 dist_origin);
+
 private:
 
 	btDefaultCollisionConfiguration*	collision_conf;
@@ -49,6 +53,7 @@ private:
 	//Vehicle variables ----------------------------------
 	btDefaultVehicleRaycaster*			vehicle_raycaster;
 	PhysVehicle3D*						phys_vehicle;
+	PhysBody3D*							phys_map;
 };
 
 class DebugDrawer : public btIDebugDraw

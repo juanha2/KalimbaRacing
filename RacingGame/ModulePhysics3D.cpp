@@ -69,23 +69,23 @@ bool ModulePhysics3D::Start()
 		btRigidBody* body = new btRigidBody(rbInfo);
 		world->addRigidBody(body);
 	}
-	// Big ramp as 2nd ground
-	{
-		btCollisionShape* colShape2 = new btBoxShape(btVector3(200.0f, 2.0f, 200.0f));
+	//// Big ramp as 2nd ground
+	//{
+	//	btCollisionShape* colShape2 = new btBoxShape(btVector3(200.0f, 2.0f, 200.0f));
 
-		mat4x4 glMatrix2 = IdentityMatrix;
-		glMatrix2.translate(0.f, -2.f, -200.f);
-		glMatrix2.rotate(20.0f, { 1,0,0 });
-		btTransform startTransform2;
-		startTransform2.setFromOpenGLMatrix(&glMatrix2);
+	//	mat4x4 glMatrix2 = IdentityMatrix;
+	//	glMatrix2.translate(0.f, -2.f, -200.f);
+	//	glMatrix2.rotate(20.0f, { 1,0,0 });
+	//	btTransform startTransform2;
+	//	startTransform2.setFromOpenGLMatrix(&glMatrix2);
 
-		btDefaultMotionState* myMotionState2 = new btDefaultMotionState(startTransform2);
-		motions.add(myMotionState2);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo2(0.0f, myMotionState2, colShape2);
+	//	btDefaultMotionState* myMotionState2 = new btDefaultMotionState(startTransform2);
+	//	motions.add(myMotionState2);
+	//	btRigidBody::btRigidBodyConstructionInfo rbInfo2(0.0f, myMotionState2, colShape2);
 
-		btRigidBody* body2 = new btRigidBody(rbInfo2);
-		world->addRigidBody(body2);
-	}
+	//	btRigidBody* body2 = new btRigidBody(rbInfo2);
+	//	world->addRigidBody(body2);
+	//}
 
 	//Vehicle inicializations
 	vehicle_raycaster = new btDefaultVehicleRaycaster(world);
@@ -345,4 +345,31 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 PhysVehicle3D* ModulePhysics3D::GetVehicle()const
 {
 	return phys_vehicle;
+}
+
+
+void ModulePhysics3D::CreateMap(const Pillars pillar_info[], float radius, int size, vec2 dist_origin)
+{
+	for (int i = 0; i < size/2; i++)
+	{
+		btCollisionShape* mapShape = new btCylinderShape(btVector3(pillar_info[i].pillar_properties.x * 0.5f, pillar_info[i].pillar_properties.y * 0.5f, pillar_info[i].pillar_properties.z * 0.5f));
+		shapes.add(mapShape);
+
+		btTransform mapTrans;
+		mapTrans.setIdentity();
+		mapTrans.setOrigin(btVector3(pillar_info[i].pillars_pos.x- dist_origin.x, pillar_info[i].pillars_pos.y, pillar_info[i].pillars_pos.z- dist_origin.y));
+
+		btVector3 localInertia(0, 0, 0);
+		mapShape->calculateLocalInertia(100.0f, localInertia);
+
+		btDefaultMotionState* mapMotionState = new btDefaultMotionState(mapTrans);
+		motions.add(mapMotionState);
+		btRigidBody::btRigidBodyConstructionInfo mapInfo(0.0f, mapMotionState, mapShape, localInertia);
+
+		btRigidBody* body = new btRigidBody(mapInfo);
+		body->setContactProcessingThreshold(BT_LARGE_FLOAT);
+		body->setActivationState(DISABLE_DEACTIVATION);
+		world->addRigidBody(body);
+	}	
+
 }
