@@ -500,7 +500,7 @@ bool ModuleMap::Start()
 	for (int i = 0; i < size/2; i++) 
 	{			
 		pillar[i].pillar_properties = { pillar_radius, pillar_height, 1.0f };
-		pillar[i].pillars_pos = { Map[i * 2 + 0]*DISTANCE_X_RATIO,  1.2f,  Map[i * 2 + 1]*DISTANCE_Z_RATIO };
+		pillar[i].pillars_pos = { Map[i * 2 + 0]*DISTANCE_X_RATIO,  1.7f,  Map[i * 2 + 1]*DISTANCE_Z_RATIO };
 
 	}
 

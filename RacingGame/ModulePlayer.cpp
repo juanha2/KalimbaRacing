@@ -22,13 +22,13 @@ bool ModulePlayer::Start()
 	VehicleInfo car;
 
 	// Car properties ----------------------------------------	
-	car.mass = 500.0f;
+	car.mass = 700.0f;
 	car.suspensionStiffness = 15.88f;
 	car.suspensionCompression = 0.83f;
 	car.suspensionDamping = 0.88f;
 	car.maxSuspensionTravelCm = 1000.0f;
-	car.frictionSlip = 50.5;
-	car.maxSuspensionForce = 6000.0f;
+	car.frictionSlip = 900;
+	car.maxSuspensionForce = 4000.0f;
 
 	// Chassis properties ---------------------------------------
 
@@ -150,7 +150,7 @@ update_status ModulePlayer::Update(float dt)
 		else turn = 0.0f;
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT&& vehicle->GetKmh() < 100.0f)//only apply acceleration if vehicle is under 100 km/h
+	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT&& vehicle->GetKmh() < 150.0f)//only apply acceleration if vehicle is under 100 km/h
 	{
 		if (vehicle->GetKmh() < 0.0f)//if its going backwards first brake
 		{
