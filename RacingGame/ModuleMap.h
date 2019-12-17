@@ -25,7 +25,7 @@ public:
 
 	// Destructor
 	~ModuleMap();
-
+	void OnCollision(PhysBody3D* body1, PhysBody3D* body2) override;
 	bool Start();
 	bool CleanUp();
 
@@ -41,6 +41,7 @@ private:
 	float pillar_mass;
 
 	p2DynArray<Primitive*> primitives;
+	p2DynArray<PhysBody3D*> waypoints;
 
 };
 

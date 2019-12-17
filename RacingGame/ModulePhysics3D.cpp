@@ -95,7 +95,9 @@ bool ModulePhysics3D::Start()
 // ---------------------------------------------------------
 update_status ModulePhysics3D::PreUpdate(float dt)
 {
+
 	world->stepSimulation(dt, 15);
+	
 
 	for (int n = 0; n < world->getDispatcher()->getNumManifolds(); n++)
 	{
@@ -117,6 +119,7 @@ update_status ModulePhysics3D::PreUpdate(float dt)
 					body2->collision_listeners[n]->OnCollision(body2, body1);
 				}
 			}
+			
 		}
 	}
 
@@ -258,6 +261,7 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 
 	comShape->addChildShape(mainTrans, mainShape);
 
+	
 	//Creation of the cabin Shape ---------------------
 	btCollisionShape* cabinShape = new btBoxShape(btVector3(info.chassis[1].chassis_size.x * 0.5f, info.chassis[1].chassis_size.y * 0.5f, info.chassis[1].chassis_size.z * 0.5f));
 	shapes.add(cabinShape);
@@ -312,7 +316,6 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	body->setContactProcessingThreshold(BT_LARGE_FLOAT);
 	body->setActivationState(DISABLE_DEACTIVATION);
 	world->addRigidBody(body);
-
 	btRaycastVehicle::btVehicleTuning tuning;
 	tuning.m_frictionSlip = info.frictionSlip;
 	tuning.m_maxSuspensionForce = info.maxSuspensionForce;
@@ -337,7 +340,7 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	// ---------------------
 
 	phys_vehicle = new PhysVehicle3D(body, vehicle, info);
-	world->addAction(vehicle);
+	world->addVehicle(vehicle);
 
 	return phys_vehicle;
 }

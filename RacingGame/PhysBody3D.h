@@ -23,20 +23,21 @@ public:
 	~PhysBody3D();
 
 	void SetBody(Sphere* primitive, float mass);
+	void SetBody(btCollisionShape* shape, Primitive* parent, float mass);
+
 	bool HasBody() const;
 	btRigidBody* GetBody() const;
 
 	void GetTransform(float* matrix) const;
 	void SetTransform(const float* matrix) const;
 	void SetPos(float x, float y, float z);
+	void SetAsSensor(bool is_sensor);
 
 	void SetSpeed(vec3 speed);
 	void Push(vec3 force);
 	void Stop();
 
 private:
-	void SetBody(btCollisionShape* shape, Primitive* parent, float mass);
-	void SetAsSensor(bool is_sensor);
 
 	btRigidBody* body;
 	btCollisionShape* colShape;

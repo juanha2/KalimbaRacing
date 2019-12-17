@@ -522,7 +522,21 @@ bool ModuleMap::Start()
 		
 		primitives.PushBack(s);
 	}	
+
+	//We create the waypoint sensors
+	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	mat4x4 glMatrix = IdentityMatrix;
+	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
+	glMatrix.rotate(0, {0,-1,0});//rotation of the box
+	btCollisionShape* shap = new btBoxShape({12.0f,5.0f,1.0f});//measures of the box
+	PhysBody3D* bod = new PhysBody3D();
 	
+	bod->SetBody(shap, cub, 0.0f);
+	bod->SetTransform(glMatrix.M);
+	bod->SetAsSensor(true);
+	bod->collision_listeners.PushBack(this);
+	primitives.PushBack(cub);
+	//____________________________
 	return ret;
 }
 
@@ -544,4 +558,11 @@ bool ModuleMap::CleanUp()
 	LOG("Destroying map");
 
 	return true;
+}
+
+void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
+{
+	//debug line to check if enters
+	body1->parentPrimitive->color = Black;
+	body2->parentPrimitive->color = Black;
 }
