@@ -544,14 +544,15 @@ bool ModuleMap::Start()
 	ramp1->color = Cyan;
 	primitives.PushBack(ramp1);
 
-	// Primitive of Ramp1
+	// Primitive of Ramp2
 	Cube* ramp2 = new Cube(vec3(ramp[1].ramp_size), 0.0f);
 	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
 	ramp2->SetRotation(-70.0f, { 0,0,1 });
 	ramp2->color = Cyan;
 	primitives.PushBack(ramp2);		
 
-	//We create the waypoint sensors
+	//We create the waypoint sensors==============================================================
+	//sensor1
 	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
 	mat4x4 glMatrix = IdentityMatrix;
 	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
@@ -564,6 +565,51 @@ bool ModuleMap::Start()
 	bod->SetAsSensor(true);
 	bod->collision_listeners.PushBack(this);
 	primitives.PushBack(cub);
+	waypoints.PushBack(bod);
+
+	//sensor2
+	glMatrix = IdentityMatrix;
+	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
+	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
+	bod = new PhysBody3D();
+	bod->SetBody(shap, cub, 0.0f);
+	bod->SetTransform(glMatrix.M);
+	bod->SetAsSensor(true);
+	bod->collision_listeners.PushBack(this);
+	primitives.PushBack(cub);
+	waypoints.PushBack(bod);
+
+
+	//sensor3
+	glMatrix = IdentityMatrix;
+	glMatrix.translate(-50, 4.5f, -44.f);//translation of the box
+	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
+	bod = new PhysBody3D();
+	bod->SetBody(shap, cub, 0.0f);
+	bod->SetTransform(glMatrix.M);
+	bod->SetAsSensor(true);
+	bod->collision_listeners.PushBack(this);
+	primitives.PushBack(cub);
+	waypoints.PushBack(bod);
+
+
+	//sensor4
+	glMatrix = IdentityMatrix;
+	glMatrix.translate(60.5f, 4.5f, -57.f);//translation of the box
+	glMatrix.rotate(35, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
+	bod = new PhysBody3D();
+	bod->SetBody(shap, cub, 0.0f);
+	bod->SetTransform(glMatrix.M);
+	bod->SetAsSensor(true);
+	bod->collision_listeners.PushBack(this);
+	primitives.PushBack(cub);
+	waypoints.PushBack(bod);
+
+
+
 	//____________________________
 	return ret;
 }
@@ -613,12 +659,17 @@ update_status ModuleMap::PostUpdate(float dt)
 bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
+	for (int i = primitives.Count() - 1; i >= 0; i--)
+	{
+		btCollisionObject* obj = world->getCollisionObjectArray()[i];
+		world->removeCollisionObject(obj);
+	}
 	return true;
 }
 
 void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 {
 	//debug line to check if enters
-	body1->parentPrimitive->color = Black;
-	body2->parentPrimitive->color = Black;
+	if(body1->parentPrimitive!=NULL)body1->parentPrimitive->color = Black;
+	if (body2->parentPrimitive != NULL)body2->parentPrimitive->color = Black;
 }

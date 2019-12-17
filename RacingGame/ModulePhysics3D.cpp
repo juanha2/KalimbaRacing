@@ -348,6 +348,8 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	// ---------------------
 	
 	phys_vehicle = new PhysVehicle3D(body, vehicle, info);
+	phys_vehicle->collision_listeners.PushBack(App->map);
+	body->setUserPointer(phys_vehicle);
 	world->addVehicle(vehicle);
 
 	return phys_vehicle;
