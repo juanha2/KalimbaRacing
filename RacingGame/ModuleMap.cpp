@@ -659,11 +659,7 @@ update_status ModuleMap::PostUpdate(float dt)
 bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
-	for (int i = primitives.Count() - 1; i >= 0; i--)
-	{
-		btCollisionObject* obj = world->getCollisionObjectArray()[i];
-		world->removeCollisionObject(obj);
-	}
+	//TODO clean all the waypoints
 	return true;
 }
 
