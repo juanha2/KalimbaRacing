@@ -549,7 +549,7 @@ bool ModuleMap::Start()
 	ramp2->color = Cyan;
 	primitives.PushBack(ramp2);	
 	
-	}	
+	
 
 	//We create the waypoint sensors
 	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
@@ -603,8 +603,6 @@ update_status ModuleMap::PostUpdate(float dt)
 bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
-
-	delete Fan_body;
 	return true;
 }
 
