@@ -431,21 +431,22 @@ void ModulePhysics3D::AddConstraintP2P(const Primitive& bodyA, const Primitive& 
 btRigidBody* ModulePhysics3D::AddConstraintSlider(const Fan fan)
 {
 	btRigidBody* bodyB = 0;
-	btCollisionShape* shape1 = new btBoxShape(btVector3(fan.fan_size.x*0.5f, fan.fan_size.y*0.5f, fan.fan_size.z*0.5f));
+	btCollisionShape* shape1 = new btBoxShape(btVector3(fan.fan_size1.x*0.5f, fan.fan_size1.y*0.5f, fan.fan_size1.z*0.5f));
+	btCollisionShape* shape3 = new btBoxShape(btVector3(fan.fan_size2.x * 0.5f, fan.fan_size2.y * 0.5f, fan.fan_size2.z * 0.5f));
 	btCollisionShape* shape2 = new btCylinderShape(btVector3(fan.joint_size.x, fan.joint_size.y, fan.joint_size.z));
+	
 	btCompoundShape* fanShape = new btCompoundShape();
 	fanShape->addChildShape(btTransform::getIdentity(), shape1);
 	fanShape->addChildShape(btTransform::getIdentity(), shape2);
+	fanShape->addChildShape(btTransform::getIdentity(), shape3);
 
 	btScalar mass = 150;
 	btVector3 localInertia;
 	fanShape->calculateLocalInertia(mass, localInertia);
 	
 	btRigidBody::btRigidBodyConstructionInfo fanInfo(mass, 0, fanShape, localInertia);
-	fanInfo.m_startWorldTransform.setOrigin(btVector3(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z));
-
-	btQuaternion orn(btVector3(1, 0, 0), 80);
-	fanInfo.m_startWorldTransform.setRotation(orn);
+	fanInfo.m_startWorldTransform.setOrigin(btVector3(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z));	
+	fanInfo.m_startWorldTransform.setRotation(fan.rotation);
 
 	btRigidBody* body = new btRigidBody(fanInfo);
 	body->setLinearFactor(btVector3(0, 0, 0));

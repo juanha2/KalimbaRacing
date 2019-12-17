@@ -511,13 +511,15 @@ bool ModuleMap::Start()
 
 	//Fan properties
 	fan.fan_pos = { -1, 10.0f, 5.0f };
-	fan.fan_size = { 20, 0.4, 6.0 };
+	fan.fan_size1 = { 20, 0.4f, 2.0f };
+	fan.fan_size2 = { 2.0f, 0.4f, 20.0f };
 	fan.joint_size = { 0.1, 0.025, 0.1 };
+	fan.rotation.setRotation(btVector3(1, 0, 0), 80);
 
 	//We create the bodies and their physics
 	App->physics->CreateMap(pillar, pillar_radius, size, dist_from_origin);
 	App->physics->CreateRamps(ramp);
-	Fan_body = App->physics->AddConstraintSlider(fan);
+	Fan_body = App->physics->AddConstraintSlider(fan);	
 
 	//Finally, we create their respective primitives in order to render	
 	for (int i = 0; i < size/2; i++)
@@ -547,9 +549,7 @@ bool ModuleMap::Start()
 	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
 	ramp2->SetRotation(-70.0f, { 0,0,1 });
 	ramp2->color = Cyan;
-	primitives.PushBack(ramp2);	
-	
-	
+	primitives.PushBack(ramp2);		
 
 	//We create the waypoint sensors
 	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
@@ -571,15 +571,25 @@ bool ModuleMap::Start()
 
 update_status ModuleMap::Update(float dt)
 {			
-	//Fan body primitive
-	Cube c1({ fan.fan_size.x,fan.fan_size.y, fan.fan_size.z }, 1.0f);
-	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
-	c1.color = Red;	
-	c1.SetRotation(80, { 1,0,0 });
+	//Rendering primitives of the Fan's 2 boxes
 	mat4x4 mat;
 	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
-	c1.transform = mat;	
+
+	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, 1.0f);
+	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
+	c1.color = Red;
+	c1.SetRotation(80, { 1,0,0 });	
+	c1.transform = mat;
 	c1.Render();
+
+	Cube c2({ fan.fan_size2.x,fan.fan_size2.y, fan.fan_size2.z }, 1.0f);
+	c2.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
+	c2.color = Red;
+	c2.SetRotation(80, { 1,0,0 });	
+	c2.transform = mat;
+	c2.Render();
+	//-----------------------------------------------------
+	
 
 	for (uint n = 0; n < primitives.Count(); n++)
 		primitives[n]->Update();

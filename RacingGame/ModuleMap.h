@@ -24,10 +24,13 @@ struct Ramps
 struct Fan
 {	
 	vec3 fan_pos;
-
-	vec3 fan_size;
+	vec3 fan_size1;
+	vec3 fan_size2;
 	vec3 joint_size;	
+
+	btQuaternion rotation;
 };
+
 class ModuleMap : public Module
 {
 public:
@@ -53,7 +56,7 @@ private:
 
 	//Ramps data
 	Ramps ramp[2];
-	Fan fan;
+	Fan fan;	
 
 	btRigidBody* Fan_body;
 	p2DynArray<Primitive*> primitives;
