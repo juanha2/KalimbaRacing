@@ -6,12 +6,10 @@
 
 ModuleMap::ModuleMap(bool start_enabled) : Module(start_enabled)
 {
-	//Set general values of Pillars
+	//Set general values of Pillars and ramps
 	pillar_radius = 1.3f;
 	pillar_height = 3.0f;
 	pillar_mass = 0.0f;
-
-	
 }
 
 // Destructor
@@ -496,16 +494,30 @@ bool ModuleMap::Start()
 	int size = 928;
 	vec2 dist_from_origin = { 115.0f,120.0f };
 
-	//We set the position and properties of the pillars	
+	//Pillar Properties	
 	for (int i = 0; i < size/2; i++) 
 	{			
-		pillar[i].pillar_properties = { pillar_radius, pillar_height, 1.0f };
+		pillar[i].pillar_size = { pillar_radius, pillar_height, 1.0f };
 		pillar[i].pillars_pos = { Map[i * 2 + 0]*DISTANCE_X_RATIO,  1.7f,  Map[i * 2 + 1]*DISTANCE_Z_RATIO };
-
 	}
+
+	//First Ramp properties ---------------------
+	ramp[0].ramp_position = { 15.0f, 1.0f ,-44.0f };
+	ramp[0].ramp_size = { 1.0f, 10.0f ,21.0f };
+
+	//Second Ramp properties ---------------------
+	ramp[1].ramp_position = { -20.0f, 1.0f ,-44.0f };
+	ramp[1].ramp_size = { 1.0f, 10.0f ,21.0f };
+
+	//Fan properties
+	fan.fan_pos = { -1, 10.0f, 5.0f };
+	fan.fan_size = { 20, 0.4, 6.0 };
+	fan.joint_size = { 0.1, 0.025, 0.1 };
 
 	//We create the bodies and their physics
 	App->physics->CreateMap(pillar, pillar_radius, size, dist_from_origin);
+	App->physics->CreateRamps(ramp);
+	Fan_body = App->physics->AddConstraintSlider(fan);
 
 	//Finally, we create their respective primitives in order to render	
 	for (int i = 0; i < size/2; i++)
@@ -521,6 +533,22 @@ bool ModuleMap::Start()
 			s->color = White;
 		
 		primitives.PushBack(s);
+	}		
+	
+	// Primitive of Ramp1
+	Cube* ramp1 = new Cube(vec3(ramp[0].ramp_size), 0.0f);
+	ramp1->SetPos(ramp[0].ramp_position.x, ramp[0].ramp_position.y, ramp[0].ramp_position.z);
+	ramp1->SetRotation(70.0f, { 0,0,1 });
+	ramp1->color = Cyan;
+	primitives.PushBack(ramp1);
+
+	// Primitive of Ramp1
+	Cube* ramp2 = new Cube(vec3(ramp[1].ramp_size), 0.0f);
+	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
+	ramp2->SetRotation(-70.0f, { 0,0,1 });
+	ramp2->color = Cyan;
+	primitives.PushBack(ramp2);	
+	
 	}	
 
 	//We create the waypoint sensors
@@ -540,6 +568,25 @@ bool ModuleMap::Start()
 	return ret;
 }
 
+
+update_status ModuleMap::Update(float dt)
+{			
+	//Fan body primitive
+	Cube c1({ fan.fan_size.x,fan.fan_size.y, fan.fan_size.z }, 1.0f);
+	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
+	c1.color = Red;	
+	c1.SetRotation(80, { 1,0,0 });
+	mat4x4 mat;
+	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
+	c1.transform = mat;	
+	c1.Render();
+
+	for (uint n = 0; n < primitives.Count(); n++)
+		primitives[n]->Update();
+
+	return UPDATE_CONTINUE;
+}
+
 // Update: draw background
 update_status ModuleMap::PostUpdate(float dt)
 {
@@ -557,6 +604,7 @@ bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
 
+	delete Fan_body;
 	return true;
 }
 

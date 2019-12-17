@@ -18,27 +18,7 @@ bool ModuleSceneIntro::Start()
 	bool ret = true;
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
-	App->camera->LookAt(vec3(0, 0, 0));
-
-	/*const int SnakeLength = 7;
-	const float StartingSize = 0.5f;
-	const float SizeIncrement = 0.2f;
-	const float BallDistance = 0.3f;
-
-	float XPos = 0.f;
-	float Size = StartingSize;
-	for (int n = 0; n < SnakeLength; n++)
-	{
-		Sphere* s = new Sphere(Size);
-		primitives.PushBack(s);
-		s->SetPos(XPos, 10.f, 2.5f);
-
-		TODO 2: Link all the spheres with your P2P constraints
-
-		XPos += Size + Size + SizeIncrement + BallDistance;
-		Size += SizeIncrement;
-	}*/
-	
+	App->camera->LookAt(vec3(0, 0, 0));	
 
 	return ret;
 }

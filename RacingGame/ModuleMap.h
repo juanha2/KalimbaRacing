@@ -12,11 +12,22 @@ class Application;
 struct Pillars
 {
 	vec3 pillars_pos;	
-	Color pillar_color;
-	vec3 pillar_properties;
+	vec3 pillar_size;
 };
 
+struct Ramps
+{
+	vec3 ramp_position;
+	vec3 ramp_size;
+};
 
+struct Fan
+{	
+	vec3 fan_pos;
+
+	vec3 fan_size;
+	vec3 joint_size;	
+};
 class ModuleMap : public Module
 {
 public:
@@ -29,17 +40,22 @@ public:
 	bool Start();
 	bool CleanUp();
 
+	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
 
 private:
 
 	//Pillars data
 	Pillars pillar[928];
-	
 	float pillar_radius;
 	float pillar_height;
 	float pillar_mass;
 
+	//Ramps data
+	Ramps ramp[2];
+	Fan fan;
+
+	btRigidBody* Fan_body;
 	p2DynArray<Primitive*> primitives;
 	p2DynArray<PhysBody3D*> waypoints;
 
