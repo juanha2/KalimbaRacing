@@ -14,6 +14,8 @@ class  PhysBody3D;
 struct PhysVehicle3D;
 struct VehicleInfo;
 struct Pillars;
+struct Ramps;
+struct Fan;
 
 class ModulePhysics3D : public Module
 {
@@ -35,25 +37,28 @@ public:
 	PhysVehicle3D* AddVehicle(const VehicleInfo& info);
 	PhysVehicle3D* GetVehicle()const;
 
+	void AddConstraintP2P(const Primitive& bodyA, const Primitive& bodyB, const btVector3& pivotInA, const btVector3& pivotInB);
+	btRigidBody* AddConstraintSlider(const Fan fan);
+
 	void CreateMap(const Pillars pillar_info[], float radius, int size, vec2 dist_origin);
+	void CreateRamps(const Ramps ramp_info[]);
 
 private:
 
-	btDefaultCollisionConfiguration*	collision_conf;
-	btCollisionDispatcher*				dispatcher;
-	btBroadphaseInterface*				broad_phase;
+	btDefaultCollisionConfiguration* collision_conf;
+	btCollisionDispatcher* dispatcher;
+	btBroadphaseInterface* broad_phase;
 	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld*			world;
-	DebugDrawer*						debug_draw;
+	btDiscreteDynamicsWorld* world;
+	DebugDrawer* debug_draw;
 
 	//New Lists
 	p2List<btDefaultMotionState*>		motions;
-	p2List<btCollisionShape*>			shapes;	
+	p2List<btCollisionShape*>			shapes;
 
 	//Vehicle variables ----------------------------------
-	btDefaultVehicleRaycaster*			vehicle_raycaster;
-	PhysVehicle3D*						phys_vehicle;
-	PhysBody3D*							phys_map;
+	btDefaultVehicleRaycaster* vehicle_raycaster;
+	PhysVehicle3D* phys_vehicle;
 };
 
 class DebugDrawer : public btIDebugDraw
