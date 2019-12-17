@@ -395,7 +395,7 @@ void ModulePhysics3D::CreateRamps(const Ramps ramp_info[])
 
 	mat4x4 rampMatrix = IdentityMatrix;
 	rampMatrix.translate(ramp_info[0].ramp_position.x, ramp_info[0].ramp_position.y, ramp_info[0].ramp_position.z);
-	rampMatrix.rotate(70.0f, { 0,0,1 });
+	rampMatrix.rotate(85.0f, { 0,0,1 });
 	btTransform rampTransform;
 	rampTransform.setFromOpenGLMatrix(&rampMatrix);
 
@@ -412,7 +412,7 @@ void ModulePhysics3D::CreateRamps(const Ramps ramp_info[])
 
 	mat4x4 rampMatrix2 = IdentityMatrix;
 	rampMatrix2.translate(ramp_info[1].ramp_position.x, ramp_info[1].ramp_position.y, ramp_info[1].ramp_position.z);
-	rampMatrix2.rotate(-70.0f, { 0,0,1 });
+	rampMatrix2.rotate(-85.0f, { 0,0,1 });
 	btTransform rampTransform2;
 	rampTransform2.setFromOpenGLMatrix(&rampMatrix2);
 

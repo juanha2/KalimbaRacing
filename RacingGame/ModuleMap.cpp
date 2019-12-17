@@ -502,17 +502,17 @@ bool ModuleMap::Start()
 	}
 
 	//First Ramp properties ---------------------
-	ramp[0].ramp_position = { 15.0f, 1.0f ,-44.0f };
-	ramp[0].ramp_size = { 1.0f, 10.0f ,21.0f };
+	ramp[0].ramp_position = { 20.0f, 0.5f ,-44.0f };
+	ramp[0].ramp_size = { 1.0f, 24.0f ,21.0f };
 
 	//Second Ramp properties ---------------------
-	ramp[1].ramp_position = { -20.0f, 1.0f ,-44.0f };
-	ramp[1].ramp_size = { 1.0f, 10.0f ,21.0f };
+	ramp[1].ramp_position = { -25.0f, 0.5f ,-44.0f };
+	ramp[1].ramp_size = { 1.0f, 24.0f ,21.0f };
 
 	//Fan properties
-	fan.fan_pos = { -1, 10.0f, 5.0f };
-	fan.fan_size1 = { 20, 0.4f, 2.0f };
-	fan.fan_size2 = { 2.0f, 0.4f, 20.0f };
+	fan.fan_pos = { -72.0f, 10.0f, 16.0f };
+	fan.fan_size1 = { 25, 0.4f, 2.0f };
+	fan.fan_size2 = { 2.0f, 0.4f, 25.0f };
 	fan.joint_size = { 0.1, 0.025, 0.1 };
 	fan.rotation.setRotation(btVector3(1, 0, 0), 80);
 
@@ -540,14 +540,14 @@ bool ModuleMap::Start()
 	// Primitive of Ramp1
 	Cube* ramp1 = new Cube(vec3(ramp[0].ramp_size), 0.0f);
 	ramp1->SetPos(ramp[0].ramp_position.x, ramp[0].ramp_position.y, ramp[0].ramp_position.z);
-	ramp1->SetRotation(70.0f, { 0,0,1 });
+	ramp1->SetRotation(85.0f, { 0,0,1 });
 	ramp1->color = Cyan;
 	primitives.PushBack(ramp1);
 
 	// Primitive of Ramp2
 	Cube* ramp2 = new Cube(vec3(ramp[1].ramp_size), 0.0f);
 	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
-	ramp2->SetRotation(-70.0f, { 0,0,1 });
+	ramp2->SetRotation(-85.0f, { 0,0,1 });
 	ramp2->color = Cyan;
 	primitives.PushBack(ramp2);		
 
@@ -623,14 +623,14 @@ update_status ModuleMap::Update(float dt)
 
 	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, 1.0f);
 	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
-	c1.color = Red;
+	c1.color = Green;
 	c1.SetRotation(80, { 1,0,0 });	
 	c1.transform = mat;
 	c1.Render();
 
 	Cube c2({ fan.fan_size2.x,fan.fan_size2.y, fan.fan_size2.z }, 1.0f);
 	c2.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
-	c2.color = Red;
+	c2.color = Green;
 	c2.SetRotation(80, { 1,0,0 });	
 	c2.transform = mat;
 	c2.Render();
