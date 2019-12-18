@@ -561,7 +561,7 @@ bool ModuleMap::Start()
 	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
 	mat4x4 glMatrix = IdentityMatrix;
 	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
-	glMatrix.rotate(0, { 0,-1,0 });//rotation of the box
+	glMatrix.rotate(180, { 0,-1,0 });//rotation of the box
 	btCollisionShape* shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
 	PhysBody3D* bod = new PhysBody3D();
 
@@ -575,9 +575,9 @@ bool ModuleMap::Start()
 	lastWaypoint = bod;
 	//sensor2
 	glMatrix = IdentityMatrix;
-	glMatrix.translate(60.5f, 4.5f, -57.f);//translation of the box
-	glMatrix.rotate(35, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
+	glMatrix.translate(35.0f, 4.5f, -108.5f);//translation of the box
+	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 9.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
 	bod->SetBody(shap, cub, 0.0f);
 	bod->SetTransform(glMatrix.M);
@@ -604,7 +604,7 @@ bool ModuleMap::Start()
 	//sensor4
 	glMatrix = IdentityMatrix;
 	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
-	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
+	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
 	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
 	bod->SetBody(shap, cub, 0.0f);

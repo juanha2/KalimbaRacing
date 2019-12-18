@@ -126,7 +126,7 @@ bool ModulePlayer::Start()
 	car.wheels[3].steering = false;
 
 	vehicle = App->physics->AddVehicle(car);
-	vehicle->SetPos(0, 12, 10);
+	vehicle->SetPos(0, 2.5f, 0);
 	
 
 	return true;
@@ -184,19 +184,22 @@ update_status ModulePlayer::Update(float dt)
 	{
 		brake = BRAKE_POWER;
 	}
-
 	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
 	{
-		//TODO teleport the vehicle
-
+		mat4x4 mat;
+		App->map->GetLastWaypoint()->GetTransform(&mat);
+		vehicle->GetBody()->setLinearVelocity({ 0,0,0 });
+		vehicle->GetBody()->setAngularVelocity({ 0,0,0 });
+		mat.M[13] += -3.5f;
+		vehicle->SetTransform(&mat);
 	}
+	
 	vehicle->ApplyEngineForce(acceleration);
 	vehicle->Turn(turn);
 	vehicle->Brake(brake);
 
-	vehicle->Render();
-
 	
+	vehicle->Render();	
 
 	return UPDATE_CONTINUE;
 }

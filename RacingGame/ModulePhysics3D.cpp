@@ -315,9 +315,7 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	
 		mat4x4 vehicle_rot=IdentityMatrix;
 		vehicle_rot.rotate(180, { 0,1,0 });
-	/*vehicle->GetTransform(vehicle_rot.M);
-	vehicle_rot.rotate(180, { 0,1,0 });
-	vehicle->SetTransform(vehicle_rot.M);*/
+	
 		startTransform.setFromOpenGLMatrix(vehicle_rot.M);
 
 	btVector3 localInertia(0, 0, 0);

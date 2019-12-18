@@ -20,6 +20,7 @@ class PhysBody3D
 {
 public:
 	PhysBody3D();
+	PhysBody3D(btRigidBody*body);
 	~PhysBody3D();
 
 	void SetBody(Sphere* primitive, float mass);
