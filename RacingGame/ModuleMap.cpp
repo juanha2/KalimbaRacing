@@ -721,3 +721,7 @@ int ModuleMap::GetLaps()
 {
 	return laps;
 }
+PhysBody3D* ModuleMap::GetLastWaypoint()
+{
+	return lastWaypoint;
+}

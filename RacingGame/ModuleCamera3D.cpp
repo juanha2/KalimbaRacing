@@ -12,7 +12,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 	Y = vec3(0.0f, 1.0f, 0.0f);
 	Z = vec3(0.0f, 0.0f, 1.0f);
 
-	Position = vec3(0.0f, 0.0f, 5.0f);
+	Position = vec3(-200.0f, 100.0f, 300.0f);
 	Reference = vec3(0.0f, 0.0f, 0.0f);
 }
 
@@ -138,6 +138,7 @@ update_status ModuleCamera3D::Update(float dt)
 		vec3 finalpos = { trans_newpos_cam.getOrigin().x(), trans_newpos_cam.getOrigin().y() + 5,trans_newpos_cam.getOrigin().z() };
 		btVector3 dist({ finalpos.x - Position.x,finalpos.y - Position.y ,finalpos.z - Position.z });
 		btScalar modu = dist.length2();
+		if (modu > 150.f)modu = 150.f;//limits the camera speed
 		dist.normalize();
 
 

@@ -127,6 +127,7 @@ bool ModulePlayer::Start()
 
 	vehicle = App->physics->AddVehicle(car);
 	vehicle->SetPos(0, 12, 10);
+	
 
 	return true;
 }
@@ -182,6 +183,12 @@ update_status ModulePlayer::Update(float dt)
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_REPEAT)
 	{
 		brake = BRAKE_POWER;
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
+	{
+		//TODO teleport the vehicle
+
 	}
 	vehicle->ApplyEngineForce(acceleration);
 	vehicle->Turn(turn);
