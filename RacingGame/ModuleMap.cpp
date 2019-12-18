@@ -21,10 +21,9 @@ ModuleMap::~ModuleMap()
 bool ModuleMap::Start()
 {
 	bool ret = true;
-
+	
 	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 	waypoint_flags[0] = true;//sets the start waypoint to true
-
 
 	//Array of pillar's coordinates
 	float Map[928] = {
@@ -514,7 +513,7 @@ bool ModuleMap::Start()
 	ramp[1].ramp_size = { 1.0f, 24.0f ,21.0f };
 
 	//Fan properties
-	fan.fan_pos = { -72.0f, 10.0f, 16.0f };
+	fan.fan_pos = { -68.0f, 10.0f, 70.0f };
 	fan.fan_size1 = { 25, 0.4f, 2.0f };
 	fan.fan_size2 = { 2.0f, 0.4f, 25.0f };
 	fan.joint_size = { 0.1, 0.025, 0.1 };
@@ -523,8 +522,9 @@ bool ModuleMap::Start()
 	//We create the bodies and their physics
 	App->physics->CreateMap(pillar, pillar_radius, size, dist_from_origin);
 	App->physics->CreateRamps(ramp);
-	Fan_body = App->physics->AddConstraintSlider(fan);
-
+	Fan_body = App->physics->AddConstraintHinge(fan);
+	Wrecking_ball= App->physics->AddConstraintp2p();
+	
 	//Finally, we create their respective primitives in order to render	
 	for (int i = 0; i < size / 2; i++)
 	{
@@ -555,71 +555,83 @@ bool ModuleMap::Start()
 	ramp2->color = Cyan;
 	primitives.PushBack(ramp2);
 
+	// Primitive of Wrecking ball structure
+	Cube* base = new Cube(vec3(4.0f, 0.4f, 14.0f));
+	base->SetPos(-76.0f, 14.0f, -44.0f);
+	base->color = Cyan;
+	primitives.PushBack(base);	
+	Wrecking_ball->setAngularVelocity({ -8,0,0 });
+
 	//We create the waypoint sensors==============================================================
 	//TODO create the sensors from a function
 	//sensor1
-	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	Cube* cub1 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	cub1->SetPos(-2.f, 7.5f, -6.f);
+	cub1->color = White;
 	mat4x4 glMatrix = IdentityMatrix;
 	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
 	glMatrix.rotate(180, { 0,-1,0 });//rotation of the box
 	btCollisionShape* shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
 	PhysBody3D* bod = new PhysBody3D();
 
-	bod->SetBody(shap, cub, 0.0f);
+	bod->SetBody(shap, cub1, 0.0f);
 	bod->SetTransform(glMatrix.M);
 	bod->SetAsSensor(true);
 	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub);
+	primitives.PushBack(cub1);
 	waypoints.PushBack(bod);
 
 	lastWaypoint = bod;
 	//sensor2
+	Cube* cub2 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	cub2->SetPos(41.0f, 7.5f, -108.5f);
+	cub2->color = White;
 	glMatrix = IdentityMatrix;
 	glMatrix.translate(35.0f, 4.5f, -108.5f);//translation of the box
 	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
 	shap = new btBoxShape({ 9.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
-	bod->SetBody(shap, cub, 0.0f);
+	bod->SetBody(shap, cub2, 0.0f);
 	bod->SetTransform(glMatrix.M);
 	bod->SetAsSensor(true);
 	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub);
+	primitives.PushBack(cub2);
 	waypoints.PushBack(bod);
 
-
 	//sensor3
+	Cube* cub3 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	cub3->SetPos(-56, 7.5f, -44.f);
+	cub3->color = White;
 	glMatrix = IdentityMatrix;
 	glMatrix.translate(-50, 4.5f, -44.f);//translation of the box
 	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
 	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
-	bod->SetBody(shap, cub, 0.0f);
+	bod->SetBody(shap, cub3, 0.0f);
 	bod->SetTransform(glMatrix.M);
 	bod->SetAsSensor(true);
 	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub);
+	primitives.PushBack(cub3);
 	waypoints.PushBack(bod);
 
-
 	//sensor4
+	Cube* cub4 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	cub4->SetPos(-29, 7.5f, 109.f);
+	cub4->color = White;
 	glMatrix = IdentityMatrix;
 	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
 	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
 	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
-	bod->SetBody(shap, cub, 0.0f);
+	bod->SetBody(shap, cub4, 0.0f);
 	bod->SetTransform(glMatrix.M);
 	bod->SetAsSensor(true);
 	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub);
+	primitives.PushBack(cub4);
 	waypoints.PushBack(bod);
-
-
-
-
-
 	//____________________________
 	return ret;
+
 }
 
 
@@ -643,8 +655,25 @@ update_status ModuleMap::Update(float dt)
 	c2.transform = mat;
 	c2.Render();
 	//-----------------------------------------------------
+	mat4x4 mat1;
+	Wrecking_ball->getWorldTransform().getOpenGLMatrix(mat1.M);
 
+	Sphere s1(2.0f, 1.0f);
+	s1.SetPos(8.0f, 0.0f, 10.0f);
+	s1.color = White;
+	s1.transform = mat1;
+	s1.Render();	
 
+	//TODO CREATE A FUNCTION
+	
+	if (Wrecking_ball->getCenterOfMassPosition().getY() > 13.0) {
+
+		if(Wrecking_ball->getCenterOfMassPosition().getZ() > -44)
+			Wrecking_ball->setAngularVelocity({ 90,0,0 });
+		if (Wrecking_ball->getCenterOfMassPosition().getZ() < -44)
+			Wrecking_ball->setAngularVelocity({ -90,0,0 });
+	}		
+	
 	for (uint n = 0; n < primitives.Count(); n++)
 		primitives[n]->Update();
 
@@ -692,30 +721,36 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 				break;
 		}
 
-
 		if (i == 0)//if its the first element of the list
 		{
 			if (waypoint_flags[waypoints.Count() - 1] == true)
 			{
 				memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 				laps++;
+			
+				App->audio->PlayFx(1);
 				lastWaypoint = body;
 				waypoint_flags[0] = true;
+
+				for (int i = 0; i < waypoints.Count(); i++) {
+					waypoints[i]->parentPrimitive->color = White;
+				}
+
+				waypoints[0]->parentPrimitive->color = Green;
 			}
 		}
 		else
 		{
 			if (waypoint_flags[i - 1] == true)
 			{
+				body->parentPrimitive->color = Green;
 				waypoint_flags[i] = true;
 				lastWaypoint = body;
 			}
 		}
 
 	}
-
-	//debug line to check if enters
-	if (body->parentPrimitive != NULL)body->parentPrimitive->color = Black;
+	
 }
 
 int ModuleMap::GetLaps()

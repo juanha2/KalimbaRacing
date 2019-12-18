@@ -47,6 +47,7 @@ public:
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
 
+	
 private:
 
 	//Pillars data
@@ -60,6 +61,7 @@ private:
 	Fan fan;
 
 	btRigidBody* Fan_body;
+	btRigidBody* Wrecking_ball;
 	p2DynArray<Primitive*> primitives;
 	p2DynArray<PhysBody3D*> waypoints;
 	PhysBody3D* lastWaypoint;

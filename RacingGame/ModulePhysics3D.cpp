@@ -435,17 +435,21 @@ void ModulePhysics3D::AddConstraintP2P(const Primitive& bodyA, const Primitive& 
 	world->addConstraint(p2p);
 }
 
-btRigidBody* ModulePhysics3D::AddConstraintSlider(const Fan fan)
+btRigidBody* ModulePhysics3D::AddConstraintHinge(const Fan fan)
 {
 	btRigidBody* bodyB = 0;
 	btCollisionShape* shape1 = new btBoxShape(btVector3(fan.fan_size1.x*0.5f, fan.fan_size1.y*0.5f, fan.fan_size1.z*0.5f));
-	btCollisionShape* shape3 = new btBoxShape(btVector3(fan.fan_size2.x * 0.5f, fan.fan_size2.y * 0.5f, fan.fan_size2.z * 0.5f));
+	shapes.add(shape1);	
 	btCollisionShape* shape2 = new btCylinderShape(btVector3(fan.joint_size.x, fan.joint_size.y, fan.joint_size.z));
-	
+	shapes.add(shape2);
+	btCollisionShape* shape3 = new btBoxShape(btVector3(fan.fan_size2.x * 0.5f, fan.fan_size2.y * 0.5f, fan.fan_size2.z * 0.5f));
+	shapes.add(shape3);
+
 	btCompoundShape* fanShape = new btCompoundShape();
 	fanShape->addChildShape(btTransform::getIdentity(), shape1);
 	fanShape->addChildShape(btTransform::getIdentity(), shape2);
 	fanShape->addChildShape(btTransform::getIdentity(), shape3);
+	shapes.add(fanShape);
 
 	btScalar mass = 150;
 	btVector3 localInertia;
@@ -458,14 +462,84 @@ btRigidBody* ModulePhysics3D::AddConstraintSlider(const Fan fan)
 	btRigidBody* body = new btRigidBody(fanInfo);
 	body->setLinearFactor(btVector3(0, 0, 0));
 	btHingeConstraint* hinge = new btHingeConstraint(*body, btVector3(0, 0, 0), btVector3(0, 1, 0), true);
-	
+
 	world->addConstraint(hinge);
 	bodyB = body;				
 	hinge->enableAngularMotor(true, -2.0f, 500);	
-
+	
 	world->addRigidBody(body);
 
 	return body;
+}
+
+
+void ModulePhysics3D::AddConstraintSlider() {
+
+	//btCollisionShape* shape1 = new btBoxShape(btVector3(2.0f, 0.4f, 2.0f));	
+
+	//btScalar mass = 10;
+	//btTransform frameInA, frameInB;
+	//frameInA = btTransform::getIdentity();
+	//frameInB = btTransform::getIdentity();
+	//btVector3 localInertia;
+	//shape1->calculateLocalInertia(mass, localInertia);	
+	////localInertia = { 0,0,0 };
+
+	//btRigidBody::btRigidBodyConstructionInfo fanInfo1(0.0f, 0, shape1, localInertia);
+	//fanInfo1.m_startWorldTransform.setOrigin(btVector3(80.0f, 0.0f, 0.0f));
+
+	//btRigidBody::btRigidBodyConstructionInfo fanInfo2(500.0f, 0, shape1, localInertia);
+	//fanInfo2.m_startWorldTransform.setOrigin(btVector3(75.0f, 0.0f, 0.0f));
+
+	//btRigidBody* body1 = new btRigidBody(fanInfo1);
+	//body1->setActivationState(DISABLE_DEACTIVATION);
+	//btRigidBody* body2 = new btRigidBody(fanInfo2);
+	//body2->setActivationState(DISABLE_DEACTIVATION);
+
+	//constraint = new btSliderConstraint(*body1, *body2, frameInA, frameInB, true);
+
+	//constraint->setLowerLinLimit(10.0F);
+	//constraint->setUpperLinLimit(60.0f);	
+	//constraint->setPoweredLinMotor(true);
+
+	///*spSlider1->setTargetAngMotorVelocity(50.0f);
+	//spSlider1->setPoweredAngMotor(true);*/
+	//
+	////spSlider1->setEnabled(true);
+	//world->addConstraint(constraint, true);
+	//world->addRigidBody(body1);
+	//world->addRigidBody(body2);
+
 
 }
 
+btRigidBody* ModulePhysics3D::AddConstraintp2p() {
+
+	btCollisionShape* shape1 = new btBoxShape(btVector3(2.0f, 0.2f, 7.0f));
+	shapes.add(shape1);
+	btCollisionShape* shape2 = new btSphereShape(2.0f);
+	shapes.add(shape2);
+
+	btScalar mass = 1000;
+	btTransform frameInA;
+	frameInA = btTransform::getIdentity();
+	btVector3 localInertia;
+	shape2->calculateLocalInertia(mass, localInertia);
+
+	btRigidBody::btRigidBodyConstructionInfo fanInfo1(0.0f, 0, shape1, { 0,0,80 });
+	fanInfo1.m_startWorldTransform.setOrigin(btVector3(-76.0f, 15.0f, -44.0f));
+
+	btRigidBody::btRigidBodyConstructionInfo fanInfo2(500.0f, 0, shape2, { 100,0,0 });
+	fanInfo2.m_startWorldTransform.setOrigin(btVector3(-76.0f, 0.0f, -36.0f));
+
+	btRigidBody* body1 = new btRigidBody(fanInfo1);
+	btRigidBody* body2 = new btRigidBody(fanInfo2);
+
+	btTypedConstraint* p2p = new btPoint2PointConstraint(*body1, *body2, { 0,0,0 }, { 0,12.0f,0 });
+	
+	world->addConstraint(p2p);
+	world->addRigidBody(body1);
+	world->addRigidBody(body2);
+
+	return body2;
+}

@@ -5,9 +5,11 @@
 #include "PhysBody3D.h"
 #include "ModulePlayer.h"
 #include "PhysVehicle3D.h"
+#include "ModuleAudio.h"
 
 ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
 {
+	
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -21,7 +23,9 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));	
-
+	App->audio->PlayMusic("Audio/music.ogg", 4.0f);
+	App->audio->LoadFx("Audio/lap.wav");
+	
 	return ret;
 }
 
@@ -29,7 +33,7 @@ bool ModuleSceneIntro::Start()
 bool ModuleSceneIntro::CleanUp()
 {
 	LOG("Unloading Intro scene");
-
+	
 	return true;
 }
 

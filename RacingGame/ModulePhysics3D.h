@@ -38,7 +38,9 @@ public:
 	PhysVehicle3D* GetVehicle()const;
 
 	void AddConstraintP2P(const Primitive& bodyA, const Primitive& bodyB, const btVector3& pivotInA, const btVector3& pivotInB);
-	btRigidBody* AddConstraintSlider(const Fan fan);
+	btRigidBody* AddConstraintHinge(const Fan fan);
+	void AddConstraintSlider();
+	btRigidBody* AddConstraintp2p();
 
 	void CreateMap(const Pillars pillar_info[], float radius, int size, vec2 dist_origin);
 	void CreateRamps(const Ramps ramp_info[]);
