@@ -103,7 +103,13 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 	}
 
 	char title[250];
+	if (App->map->GetLaps() >= 3)
+	{
+		sprintf_s(title, "%.1f Km/h || VICTORY!", App->player->vehicle->GetKmh());
+	}
+	else
 	sprintf_s(title, "%.1f Km/h || Total Laps: %i", App->player->vehicle->GetKmh(),App->map->GetLaps());
+	
 	App->window->SetTitle(title);
 
 

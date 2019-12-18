@@ -3,7 +3,7 @@
 #include "ModuleMap.h"
 #include "Primitive.h"
 #include "PhysBody3D.h"
-
+#include "PhysVehicle3D.h"
 ModuleMap::ModuleMap(bool start_enabled) : Module(start_enabled)
 {
 	//Set general values of Pillars and ramps
@@ -679,7 +679,7 @@ bool ModuleMap::CleanUp()
 void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 {
 	PhysBody3D* body;
-	if (body1->GetBody() != NULL)
+	if (body1->GetBody() != App->player->vehicle->GetBody())
 		body = body1;
 	else body = body2;
 
@@ -688,7 +688,8 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 		int i;
 		for (i = 0; i < waypoints.Count(); i++)//determines the id of whe current waypoint
 		{
-			if (body == waypoints[i])break;
+			if (body == waypoints[i])
+				break;
 		}
 
 
