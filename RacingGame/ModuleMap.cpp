@@ -761,3 +761,17 @@ PhysBody3D* ModuleMap::GetLastWaypoint()
 {
 	return lastWaypoint;
 }
+void ModuleMap::ResetGame()
+{
+	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
+	for (int i = 0; i < waypoints.Count(); i++)
+	{
+		waypoints[i]->parentPrimitive->color = White;
+
+	}
+	lastWaypoint = waypoints[0];
+	waypoint_flags[0] = true;
+	App->player->TpToLastWaypoint();
+	laps = 0;
+}
+

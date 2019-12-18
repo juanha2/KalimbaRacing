@@ -19,6 +19,8 @@ public:
 	update_status Update(float dt);
 	bool CleanUp();
 
+	void TpToLastWaypoint();
+
 public:
 
 	PhysVehicle3D* vehicle;

@@ -43,6 +43,7 @@ public:
 	bool Start();
 	bool CleanUp();
 	int GetLaps();
+	void ResetGame();
 	PhysBody3D* GetLastWaypoint();
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
@@ -69,6 +70,9 @@ private:
 	int laps=0;
 
 };
+
+
+
 
 #endif // __ModuleMap_H__
 

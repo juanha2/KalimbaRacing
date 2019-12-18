@@ -184,15 +184,15 @@ update_status ModulePlayer::Update(float dt)
 	{
 		brake = BRAKE_POWER;
 	}
-	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
+	if (App->input->GetKey(SDL_SCANCODE_T) == KEY_DOWN)
 	{
-		mat4x4 mat;
-		App->map->GetLastWaypoint()->GetTransform(&mat);
-		vehicle->GetBody()->setLinearVelocity({ 0,0,0 });
-		vehicle->GetBody()->setAngularVelocity({ 0,0,0 });
-		mat.M[13] += -3.5f;
-		vehicle->SetTransform(&mat);
+		TpToLastWaypoint();
 	}
+	if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_DOWN)
+	{
+		App->map->ResetGame();
+	}
+
 	
 	vehicle->ApplyEngineForce(acceleration);
 	vehicle->Turn(turn);
@@ -202,6 +202,17 @@ update_status ModulePlayer::Update(float dt)
 	vehicle->Render();	
 
 	return UPDATE_CONTINUE;
+}
+
+
+void ModulePlayer::TpToLastWaypoint()
+{
+	mat4x4 mat;
+	App->map->GetLastWaypoint()->GetTransform(&mat);
+	vehicle->GetBody()->setLinearVelocity({ 0,0,0 });
+	vehicle->GetBody()->setAngularVelocity({ 0,0,0 });
+	mat.M[13] += -3.5f;
+	vehicle->SetTransform(&mat);
 }
 
 
