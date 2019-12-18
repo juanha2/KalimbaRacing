@@ -3,6 +3,8 @@
 #include "ModuleSceneIntro.h"
 #include "Primitive.h"
 #include "PhysBody3D.h"
+#include "ModulePlayer.h"
+#include "PhysVehicle3D.h"
 
 ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
 {
@@ -99,6 +101,12 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 	{
 		primitives[n]->Render();
 	}
+
+	char title[250];
+	sprintf_s(title, "%.1f Km/h || Total Laps: %i", App->player->vehicle->GetKmh(),App->map->GetLaps());
+	App->window->SetTitle(title);
+
+
 
 	return UPDATE_CONTINUE;
 }

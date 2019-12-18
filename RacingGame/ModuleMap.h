@@ -11,7 +11,7 @@ class Application;
 
 struct Pillars
 {
-	vec3 pillars_pos;	
+	vec3 pillars_pos;
 	vec3 pillar_size;
 };
 
@@ -22,11 +22,11 @@ struct Ramps
 };
 
 struct Fan
-{	
+{
 	vec3 fan_pos;
 	vec3 fan_size1;
 	vec3 fan_size2;
-	vec3 joint_size;	
+	vec3 joint_size;
 
 	btQuaternion rotation;
 };
@@ -42,7 +42,7 @@ public:
 	void OnCollision(PhysBody3D* body1, PhysBody3D* body2) override;
 	bool Start();
 	bool CleanUp();
-
+	int GetLaps();
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
 
@@ -56,11 +56,14 @@ private:
 
 	//Ramps data
 	Ramps ramp[2];
-	Fan fan;	
+	Fan fan;
 
 	btRigidBody* Fan_body;
 	p2DynArray<Primitive*> primitives;
 	p2DynArray<PhysBody3D*> waypoints;
+	PhysBody3D* lastWaypoint;
+	bool  waypoint_flags[4];
+	int laps=0;
 
 };
 

@@ -20,7 +20,11 @@ ModuleMap::~ModuleMap()
 // Called before render is available
 bool ModuleMap::Start()
 {
-	bool ret = true;		
+	bool ret = true;
+
+	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
+	waypoint_flags[0] = true;//sets the start waypoint to true
+
 
 	//Array of pillar's coordinates
 	float Map[928] = {
@@ -490,15 +494,15 @@ bool ModuleMap::Start()
 				0.493171f, 0.292000f
 
 
-	};	
+	};
 	int size = 928;
 	vec2 dist_from_origin = { 115.0f,120.0f };
 
 	//Pillar Properties	
-	for (int i = 0; i < size/2; i++) 
-	{			
+	for (int i = 0; i < size / 2; i++)
+	{
 		pillar[i].pillar_size = { pillar_radius, pillar_height, 1.0f };
-		pillar[i].pillars_pos = { Map[i * 2 + 0]*DISTANCE_X_RATIO,  1.7f,  Map[i * 2 + 1]*DISTANCE_Z_RATIO };
+		pillar[i].pillars_pos = { Map[i * 2 + 0] * DISTANCE_X_RATIO,  1.7f,  Map[i * 2 + 1] * DISTANCE_Z_RATIO };
 	}
 
 	//First Ramp properties ---------------------
@@ -519,24 +523,24 @@ bool ModuleMap::Start()
 	//We create the bodies and their physics
 	App->physics->CreateMap(pillar, pillar_radius, size, dist_from_origin);
 	App->physics->CreateRamps(ramp);
-	Fan_body = App->physics->AddConstraintSlider(fan);	
+	Fan_body = App->physics->AddConstraintSlider(fan);
 
 	//Finally, we create their respective primitives in order to render	
-	for (int i = 0; i < size/2; i++)
-	{				
+	for (int i = 0; i < size / 2; i++)
+	{
 		Cylinder* s = new Cylinder(pillar_radius * 0.5f, pillar_height, pillar_mass);
-		s->SetPos(pillar[i].pillars_pos.x-115.0f, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z-120.0f);
+		s->SetPos(pillar[i].pillars_pos.x - 115.0f, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z - 120.0f);
 		s->SetRotation(90.f, { 0.0f,0.0f,1.0f });
-		
+
 		//We alternate color between pillars
 		if (i % 2 == 0)
 			s->color = Red;
 		else
 			s->color = White;
-		
+
 		primitives.PushBack(s);
-	}		
-	
+	}
+
 	// Primitive of Ramp1
 	Cube* ramp1 = new Cube(vec3(ramp[0].ramp_size), 0.0f);
 	ramp1->SetPos(ramp[0].ramp_position.x, ramp[0].ramp_position.y, ramp[0].ramp_position.z);
@@ -549,17 +553,18 @@ bool ModuleMap::Start()
 	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
 	ramp2->SetRotation(-85.0f, { 0,0,1 });
 	ramp2->color = Cyan;
-	primitives.PushBack(ramp2);		
+	primitives.PushBack(ramp2);
 
 	//We create the waypoint sensors==============================================================
+	//TODO create the sensors from a function
 	//sensor1
 	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
 	mat4x4 glMatrix = IdentityMatrix;
 	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
-	glMatrix.rotate(0, {0,-1,0});//rotation of the box
-	btCollisionShape* shap = new btBoxShape({12.0f,5.0f,1.0f});//measures of the box
+	glMatrix.rotate(0, { 0,-1,0 });//rotation of the box
+	btCollisionShape* shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
 	PhysBody3D* bod = new PhysBody3D();
-	
+
 	bod->SetBody(shap, cub, 0.0f);
 	bod->SetTransform(glMatrix.M);
 	bod->SetAsSensor(true);
@@ -567,11 +572,12 @@ bool ModuleMap::Start()
 	primitives.PushBack(cub);
 	waypoints.PushBack(bod);
 
+	lastWaypoint = bod;
 	//sensor2
 	glMatrix = IdentityMatrix;
-	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
-	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
+	glMatrix.translate(60.5f, 4.5f, -57.f);//translation of the box
+	glMatrix.rotate(35, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
 	bod->SetBody(shap, cub, 0.0f);
 	bod->SetTransform(glMatrix.M);
@@ -597,9 +603,9 @@ bool ModuleMap::Start()
 
 	//sensor4
 	glMatrix = IdentityMatrix;
-	glMatrix.translate(60.5f, 4.5f, -57.f);//translation of the box
-	glMatrix.rotate(35, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
+	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
+	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
+	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
 	bod = new PhysBody3D();
 	bod->SetBody(shap, cub, 0.0f);
 	bod->SetTransform(glMatrix.M);
@@ -610,13 +616,15 @@ bool ModuleMap::Start()
 
 
 
+
+
 	//____________________________
 	return ret;
 }
 
 
 update_status ModuleMap::Update(float dt)
-{			
+{
 	//Rendering primitives of the Fan's 2 boxes
 	mat4x4 mat;
 	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
@@ -624,18 +632,18 @@ update_status ModuleMap::Update(float dt)
 	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, 1.0f);
 	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
 	c1.color = Green;
-	c1.SetRotation(80, { 1,0,0 });	
+	c1.SetRotation(80, { 1,0,0 });
 	c1.transform = mat;
 	c1.Render();
 
 	Cube c2({ fan.fan_size2.x,fan.fan_size2.y, fan.fan_size2.z }, 1.0f);
 	c2.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
 	c2.color = Green;
-	c2.SetRotation(80, { 1,0,0 });	
+	c2.SetRotation(80, { 1,0,0 });
 	c2.transform = mat;
 	c2.Render();
 	//-----------------------------------------------------
-	
+
 
 	for (uint n = 0; n < primitives.Count(); n++)
 		primitives[n]->Update();
@@ -660,12 +668,56 @@ bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
 	//TODO clean all the waypoints
+	for (int i = waypoints.Count() - 1; i >= 0; i--)
+	{
+		delete waypoints[i];
+	}
+	waypoints.Clear();
 	return true;
 }
 
 void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 {
+	PhysBody3D* body;
+	if (body1->GetBody() != NULL)
+		body = body1;
+	else body = body2;
+
+	if (body != lastWaypoint)//only executes code if the last waypoint visited is not the current one
+	{
+		int i;
+		for (i = 0; i < waypoints.Count(); i++)//determines the id of whe current waypoint
+		{
+			if (body == waypoints[i])break;
+		}
+
+
+		if (i == 0)//if its the first element of the list
+		{
+			if (waypoint_flags[waypoints.Count() - 1] == true)
+			{
+				memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
+				laps++;
+				lastWaypoint = body;
+				waypoint_flags[0] = true;
+			}
+		}
+		else
+		{
+			if (waypoint_flags[i - 1] == true)
+			{
+				waypoint_flags[i] = true;
+				lastWaypoint = body;
+			}
+		}
+
+	}
+
 	//debug line to check if enters
-	if(body1->parentPrimitive!=NULL)body1->parentPrimitive->color = Black;
-	if (body2->parentPrimitive != NULL)body2->parentPrimitive->color = Black;
+	if (body->parentPrimitive != NULL)body->parentPrimitive->color = Black;
+}
+
+int ModuleMap::GetLaps()
+{
+	return laps;
 }
