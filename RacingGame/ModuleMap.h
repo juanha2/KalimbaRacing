@@ -59,6 +59,8 @@ public:
 	void CreateRamps(const btVector3 size, const btVector3 pos, const float angle);
 	btRigidBody* CreateFan(Fan fan);
 	btRigidBody* CreateWreckingBall(WreckingBall wreckingball);
+
+	PhysBody3D* CreateSensor(vec3 shapePos, vec3 rbPos, btVector3 rbHalfDimensions, float rbRotation);
 	void WreckingBallMovement();	
 	
 private:

@@ -107,7 +107,7 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 	if (App->map->GetLaps() >= 3)
 	{
 		App->audio->PlayFx(3);
-		sprintf_s(title, "%.1f Km/h || VICTORY!", App->player->vehicle->GetKmh());
+		sprintf_s(title, "%.1f Km/h || Best Lap Time: %.2f || VICTORY!",App->player->vehicle->GetKmh(), best_lap_time);
 	}
 	else
 	{

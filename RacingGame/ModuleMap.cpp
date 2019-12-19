@@ -21,7 +21,6 @@ bool ModuleMap::Start()
 	
 	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 	waypoint_flags[0] = true;//sets the start waypoint to true
-	App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
 	App->scene_intro->lap_time.Start();
 
 	//Floor creation
@@ -540,72 +539,11 @@ bool ModuleMap::Start()
 	//----------------------------------------------	
 
 	//We create the waypoint sensors==============================================================
-	//TODO create the sensors from a function
-	//sensor1
-	Cube* cub1 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
-	cub1->SetPos(-2.f, 7.5f, -6.f);
-	cub1->color = White;
-	mat4x4 glMatrix = IdentityMatrix;
-	glMatrix.translate(-2.f, 4.5f, 0.f);//translation of the box
-	glMatrix.rotate(180, { 0,-1,0 });//rotation of the box
-	btCollisionShape* shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
-	PhysBody3D* bod = new PhysBody3D();
-
-	bod->SetBody(shap, cub1, 0.0f);
-	bod->SetTransform(glMatrix.M);
-	bod->SetAsSensor(true);
-	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub1);
-	waypoints.PushBack(bod);
-
-	lastWaypoint = bod;
-	//sensor2
-	Cube* cub2 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
-	cub2->SetPos(41.0f, 7.5f, -108.5f);
-	cub2->color = White;
-	glMatrix = IdentityMatrix;
-	glMatrix.translate(35.0f, 4.5f, -108.5f);//translation of the box
-	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 9.0f,5.0f,1.0f });//measures of the box
-	bod = new PhysBody3D();
-	bod->SetBody(shap, cub2, 0.0f);
-	bod->SetTransform(glMatrix.M);
-	bod->SetAsSensor(true);
-	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub2);
-	waypoints.PushBack(bod);
-
-	//sensor3
-	Cube* cub3 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
-	cub3->SetPos(-56, 7.5f, -44.f);
-	cub3->color = White;
-	glMatrix = IdentityMatrix;
-	glMatrix.translate(-50, 4.5f, -44.f);//translation of the box
-	glMatrix.rotate(90, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 12.0f,5.0f,1.0f });//measures of the box
-	bod = new PhysBody3D();
-	bod->SetBody(shap, cub3, 0.0f);
-	bod->SetTransform(glMatrix.M);
-	bod->SetAsSensor(true);
-	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub3);
-	waypoints.PushBack(bod);
-
-	//sensor4
-	Cube* cub4 = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
-	cub4->SetPos(-29, 7.5f, 109.f);
-	cub4->color = White;
-	glMatrix = IdentityMatrix;
-	glMatrix.translate(-35, 4.5f, 109.f);//translation of the box
-	glMatrix.rotate(-90, { 0,-1,0 });//rotation of the box
-	shap = new btBoxShape({ 15.0f,5.0f,1.0f });//measures of the box
-	bod = new PhysBody3D();
-	bod->SetBody(shap, cub4, 0.0f);
-	bod->SetTransform(glMatrix.M);
-	bod->SetAsSensor(true);
-	bod->collision_listeners.PushBack(this);
-	primitives.PushBack(cub4);
-	waypoints.PushBack(bod);
+	lastWaypoint = CreateSensor({ -2.f, 7.5f, -6.f }, { -2.f, 4.5f, 0.f }, { 12.0f,5.0f,1.0f },180.f);
+	CreateSensor({ 41.0f, 7.5f, -108.5f }, { 35.0f, 4.5f, -108.5f }, { 9.0f,5.0f,1.0f },-90);
+	CreateSensor({ -56, 7.5f, -44.f }, { -50, 4.5f, -44.f }, { 12.0f,5.0f,1.0f }, 90);
+	CreateSensor({ -29, 7.5f, 109.f }, { -35, 4.5f, 109.f }, { 15.0f,5.0f,1.0f }, -90);
+	
 	//____________________________
 
 	return ret;
@@ -929,4 +867,28 @@ void ModuleMap::WreckingBallMovement() {
 			wreckingball_body->setAngularVelocity({ -90,0,0 });
 	}
 
+}
+
+
+//this function creates a sensor/waypoint
+//the rigid body rotation takes the Up axis as the rotation axis
+PhysBody3D* ModuleMap::CreateSensor(vec3 shapePos,vec3 rbPos,btVector3 rbHalfDimensions,float rbRotation)
+{
+	Cube* cub = new Cube({ 1.0f, 1.0f, 1.0f }, 0.0f);
+	cub->SetPos(shapePos.x,shapePos.y,shapePos.z);
+	cub->color = White;
+	mat4x4 glMatrix = IdentityMatrix;
+	glMatrix.translate(rbPos.x,rbPos.y,rbPos.z);//translation of the box
+	glMatrix.rotate(rbRotation, { 0,-1,0 });//rotation of the box
+	btCollisionShape* shap = new btBoxShape(rbHalfDimensions);//measures of the box
+	PhysBody3D* bod = new PhysBody3D();
+
+	bod->SetBody(shap, cub, 0.0f);
+	bod->SetTransform(glMatrix.M);
+	bod->SetAsSensor(true);
+	bod->collision_listeners.PushBack(this);
+	primitives.PushBack(cub);
+	waypoints.PushBack(bod);
+
+	return bod;
 }
