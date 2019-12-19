@@ -30,10 +30,5 @@ public:
 
 private:
 
-	void HandleDebugInput();
-	void DebugSpawnPrimitive(Primitive* p);
-
 	bool victory_played;
-
-	p2DynArray<Primitive*> primitives;
 };
