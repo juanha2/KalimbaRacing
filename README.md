@@ -10,6 +10,7 @@ Project GitHub:https://github.com/juanha2/RacingGame
 ## Game Controls:
 
 - Arrow keys: Car movement
+- Space key: Car brake
 - R: Go to previous checkpoint
 - Q: Restart Game
 
@@ -29,7 +30,8 @@ In order to finish the race, you have to achieve three laps as quick as possible
 ## Some game features
 * Smooth camera movement
 * Added fan and wreckingball with constraints
-* Added Timer!
+* Added Lap Timer!
 * Checkpoint and laps system
 * Restart + Go to checkpoint functionalities
-
+* All UI info is displayed in the window title
+* Keeps record of Best sesion lap time! 
