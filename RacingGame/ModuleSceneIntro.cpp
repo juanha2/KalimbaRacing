@@ -23,7 +23,7 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));	
-	App->audio->PlayMusic("Audio/music.ogg", 4.0f);
+	//App->audio->PlayMusic("Audio/music.ogg", 4.0f);
 	App->audio->LoadFx("Audio/lap.wav");
 	
 	return ret;
@@ -85,10 +85,6 @@ update_status ModuleSceneIntro::Update(float dt)
 	//TODO move the camera debug mode to the handle inmput function, jsut activate the camera debug property when in debug
 	if (App->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN)
 		App->camera->debugcamera = !App->camera->debugcamera;
-
-	Plane p(vec3(0, 1, 0));
-	p.axis = true;
-	p.Render();
 
 	if (App->debug == true)
 		HandleDebugInput();

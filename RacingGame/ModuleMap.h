@@ -15,20 +15,24 @@ struct Pillars
 	vec3 pillar_size;
 };
 
-struct Ramps
-{
-	vec3 ramp_position;
-	vec3 ramp_size;
-};
-
 struct Fan
 {
 	vec3 fan_pos;
 	vec3 fan_size1;
 	vec3 fan_size2;
 	vec3 joint_size;
+	int	mass;
 
 	btQuaternion rotation;
+};
+
+struct WreckingBall
+{
+	btVector3 base_pos;
+	btVector3 base_size;
+	btVector3 ball_pos;	
+	btScalar ball_size; //Radius
+	btScalar mass;	
 };
 
 class ModuleMap : public Module
@@ -39,35 +43,42 @@ public:
 
 	// Destructor
 	~ModuleMap();
-	void OnCollision(PhysBody3D* body1, PhysBody3D* body2) override;
+	
 	bool Start();
 	bool CleanUp();
-	int GetLaps();
-	void ResetGame();
-	PhysBody3D* GetLastWaypoint();
+	void OnCollision(PhysBody3D* body1, PhysBody3D* body2) override;	
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
 
+	int GetLaps();
+	void ResetGame();
+	PhysBody3D* GetLastWaypoint();
+
+	void CreateFloor(const btVector3 size, const btVector3 pos);
+	void CreatePillars(const Pillars pillar_info[], const int size, const vec2 dist_origin);
+	void CreateRamps(const btVector3 size, const btVector3 pos, const float angle);
+	btRigidBody* CreateFan(Fan fan);
+	btRigidBody* CreateWreckingBall(WreckingBall wreckingball);
+	void WreckingBallMovement();
 	
 private:
 
-	//Pillars data
-	Pillars pillar[928];
-	float pillar_radius;
-	float pillar_height;
-	float pillar_mass;
-
-	//Ramps data
-	Ramps ramp[2];
+	Pillars pillar[928];	
 	Fan fan;
+	WreckingBall wreckingball;
 
 	btRigidBody* Fan_body;
-	btRigidBody* Wrecking_ball;
-	p2DynArray<Primitive*> primitives;
-	p2DynArray<PhysBody3D*> waypoints;
+	btRigidBody* wreckingball_body;	
+	
 	PhysBody3D* lastWaypoint;
 	bool  waypoint_flags[4];
 	int laps=0;
+
+	//New Lists
+	p2List<btDefaultMotionState*>		motions;
+	p2List<btCollisionShape*>			shapes;
+	p2DynArray<Primitive*> primitives;
+	p2DynArray<PhysBody3D*> waypoints;
 
 };
 

@@ -53,39 +53,7 @@ bool ModulePhysics3D::Start()
 	world->setDebugDrawer(debug_draw);
 	world->setGravity(GRAVITY);
 
-	// Big rectangle as ground
-	{
-		btCollisionShape* colShape = new btBoxShape(btVector3(200.0f, 2.0f, 200.0f));
-
-		mat4x4 glMatrix = IdentityMatrix;
-		glMatrix.translate(0.f, -2.f, 0.f);
-		btTransform startTransform;
-		startTransform.setFromOpenGLMatrix(&glMatrix);
-
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		motions.add(myMotionState);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f, myMotionState, colShape);
-
-		btRigidBody* body = new btRigidBody(rbInfo);
-		world->addRigidBody(body);
-	}
-	//// Big ramp as 2nd ground
-	//{
-	//	btCollisionShape* colShape2 = new btBoxShape(btVector3(200.0f, 2.0f, 200.0f));
-
-	//	mat4x4 glMatrix2 = IdentityMatrix;
-	//	glMatrix2.translate(0.f, -2.f, -200.f);
-	//	glMatrix2.rotate(20.0f, { 1,0,0 });
-	//	btTransform startTransform2;
-	//	startTransform2.setFromOpenGLMatrix(&glMatrix2);
-
-	//	btDefaultMotionState* myMotionState2 = new btDefaultMotionState(startTransform2);
-	//	motions.add(myMotionState2);
-	//	btRigidBody::btRigidBodyConstructionInfo rbInfo2(0.0f, myMotionState2, colShape2);
-
-	//	btRigidBody* body2 = new btRigidBody(rbInfo2);
-	//	world->addRigidBody(body2);
-	//}
+	
 
 	//Vehicle inicializations
 	vehicle_raycaster = new btDefaultVehicleRaycaster(world);
@@ -175,8 +143,7 @@ bool ModulePhysics3D::CleanUp()
 	for (p2List_item<btCollisionShape*>* item = shapes.getFirst(); item; item = item->next)
 		delete item->data;
 
-	shapes.clear();
-	//TODO REMOVE CONSTRAINTS
+	shapes.clear();	
 
 	delete phys_vehicle;
 	delete vehicle_raycaster;
@@ -365,181 +332,18 @@ PhysVehicle3D* ModulePhysics3D::GetVehicle()const
 	return phys_vehicle;
 }
 
-
-void ModulePhysics3D::CreateMap(const Pillars pillar_info[], float radius, int size, vec2 dist_origin)
+btPoint2PointConstraint* ModulePhysics3D::AddConstraintP2P(btRigidBody* bodyA, btRigidBody* bodyB, const btVector3& pivotInA, const btVector3& pivotInB)
 {
-	for (int i = 0; i < size/2; i++)
-	{
-		btCollisionShape* mapShape = new btCylinderShape(btVector3(pillar_info[i].pillar_size.x * 0.5f, pillar_info[i].pillar_size.y * 0.5f, pillar_info[i].pillar_size.z * 0.5f));
-		shapes.add(mapShape);
-
-		btTransform mapTrans;
-		mapTrans.setIdentity();
-		mapTrans.setOrigin(btVector3(pillar_info[i].pillars_pos.x- dist_origin.x, pillar_info[i].pillars_pos.y, pillar_info[i].pillars_pos.z- dist_origin.y));
-
-		btVector3 localInertia(0, 0, 0);
-		mapShape->calculateLocalInertia(100.0f, localInertia);
-
-		btDefaultMotionState* mapMotionState = new btDefaultMotionState(mapTrans);
-		motions.add(mapMotionState);
-		btRigidBody::btRigidBodyConstructionInfo mapInfo(0.0f, mapMotionState, mapShape, localInertia);
-
-		btRigidBody* body = new btRigidBody(mapInfo);
-		body->setContactProcessingThreshold(BT_LARGE_FLOAT);
-		body->setActivationState(DISABLE_DEACTIVATION);
-		world->addRigidBody(body);
-	}	
-
-}
-
-void ModulePhysics3D::CreateRamps(const Ramps ramp_info[]) 
-{
-	// First Ramp
-	btCollisionShape* rampShape1 = new btBoxShape(btVector3(ramp_info[0].ramp_size.x * 0.5f, ramp_info[0].ramp_size.y * 0.5f, ramp_info[0].ramp_size.z * 0.5f));
-	shapes.add(rampShape1);
-
-	mat4x4 rampMatrix = IdentityMatrix;
-	rampMatrix.translate(ramp_info[0].ramp_position.x, ramp_info[0].ramp_position.y, ramp_info[0].ramp_position.z);
-	rampMatrix.rotate(85.0f, { 0,0,1 });
-	btTransform rampTransform;
-	rampTransform.setFromOpenGLMatrix(&rampMatrix);
-
-	btDefaultMotionState* rampMotionState = new btDefaultMotionState(rampTransform);
-	motions.add(rampMotionState);
-	btRigidBody::btRigidBodyConstructionInfo rampInfo(0.0f, rampMotionState, rampShape1);
-
-	btRigidBody* body = new btRigidBody(rampInfo);
-	world->addRigidBody(body);
-
-	// Second Ramp
-	btCollisionShape* rampShape2 = new btBoxShape(btVector3(ramp_info[1].ramp_size.x * 0.5f, ramp_info[1].ramp_size.y * 0.5f, ramp_info[1].ramp_size.z * 0.5f));
-	shapes.add(rampShape2);
-
-	mat4x4 rampMatrix2 = IdentityMatrix;
-	rampMatrix2.translate(ramp_info[1].ramp_position.x, ramp_info[1].ramp_position.y, ramp_info[1].ramp_position.z);
-	rampMatrix2.rotate(-85.0f, { 0,0,1 });
-	btTransform rampTransform2;
-	rampTransform2.setFromOpenGLMatrix(&rampMatrix2);
-
-	btDefaultMotionState* rampMotionState2 = new btDefaultMotionState(rampTransform2);
-	motions.add(rampMotionState2);
-	btRigidBody::btRigidBodyConstructionInfo rampInfo2(0.0f, rampMotionState2, rampShape2);
-
-	btRigidBody* body2 = new btRigidBody(rampInfo2);
-	world->addRigidBody(body2);
-}
-
-void ModulePhysics3D::AddConstraintP2P(const Primitive& bodyA, const Primitive& bodyB, const btVector3& pivotInA, const btVector3& pivotInB)
-{
-	btTypedConstraint* p2p = new btPoint2PointConstraint(*bodyA.body.GetBody(), *bodyB.body.GetBody(), pivotInA, pivotInB);
+	btPoint2PointConstraint* p2p = new btPoint2PointConstraint(*bodyA, *bodyB, pivotInA, pivotInB);
 	world->addConstraint(p2p);
+	return p2p;
 }
 
-btRigidBody* ModulePhysics3D::AddConstraintHinge(const Fan fan)
+btHingeConstraint* ModulePhysics3D::AddConstraintHinge(btRigidBody* body, btVector3 pivotInA, btVector3 pivotInB, bool useReferenceA)
 {
-	btRigidBody* bodyB = 0;
-	btCollisionShape* shape1 = new btBoxShape(btVector3(fan.fan_size1.x*0.5f, fan.fan_size1.y*0.5f, fan.fan_size1.z*0.5f));
-	shapes.add(shape1);	
-	btCollisionShape* shape2 = new btCylinderShape(btVector3(fan.joint_size.x, fan.joint_size.y, fan.joint_size.z));
-	shapes.add(shape2);
-	btCollisionShape* shape3 = new btBoxShape(btVector3(fan.fan_size2.x * 0.5f, fan.fan_size2.y * 0.5f, fan.fan_size2.z * 0.5f));
-	shapes.add(shape3);
-
-	btCompoundShape* fanShape = new btCompoundShape();
-	fanShape->addChildShape(btTransform::getIdentity(), shape1);
-	fanShape->addChildShape(btTransform::getIdentity(), shape2);
-	fanShape->addChildShape(btTransform::getIdentity(), shape3);
-	shapes.add(fanShape);
-
-	btScalar mass = 150;
-	btVector3 localInertia;
-	fanShape->calculateLocalInertia(mass, localInertia);
-	
-	btRigidBody::btRigidBodyConstructionInfo fanInfo(mass, 0, fanShape, localInertia);
-	fanInfo.m_startWorldTransform.setOrigin(btVector3(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z));	
-	fanInfo.m_startWorldTransform.setRotation(fan.rotation);
-
-	btRigidBody* body = new btRigidBody(fanInfo);
-	body->setLinearFactor(btVector3(0, 0, 0));
 	btHingeConstraint* hinge = new btHingeConstraint(*body, btVector3(0, 0, 0), btVector3(0, 1, 0), true);
-
 	world->addConstraint(hinge);
-	bodyB = body;				
-	hinge->enableAngularMotor(true, -2.0f, 500);	
-	
-	world->addRigidBody(body);
-
-	return body;
+	return hinge;
 }
 
 
-void ModulePhysics3D::AddConstraintSlider() {
-
-	//btCollisionShape* shape1 = new btBoxShape(btVector3(2.0f, 0.4f, 2.0f));	
-
-	//btScalar mass = 10;
-	//btTransform frameInA, frameInB;
-	//frameInA = btTransform::getIdentity();
-	//frameInB = btTransform::getIdentity();
-	//btVector3 localInertia;
-	//shape1->calculateLocalInertia(mass, localInertia);	
-	////localInertia = { 0,0,0 };
-
-	//btRigidBody::btRigidBodyConstructionInfo fanInfo1(0.0f, 0, shape1, localInertia);
-	//fanInfo1.m_startWorldTransform.setOrigin(btVector3(80.0f, 0.0f, 0.0f));
-
-	//btRigidBody::btRigidBodyConstructionInfo fanInfo2(500.0f, 0, shape1, localInertia);
-	//fanInfo2.m_startWorldTransform.setOrigin(btVector3(75.0f, 0.0f, 0.0f));
-
-	//btRigidBody* body1 = new btRigidBody(fanInfo1);
-	//body1->setActivationState(DISABLE_DEACTIVATION);
-	//btRigidBody* body2 = new btRigidBody(fanInfo2);
-	//body2->setActivationState(DISABLE_DEACTIVATION);
-
-	//constraint = new btSliderConstraint(*body1, *body2, frameInA, frameInB, true);
-
-	//constraint->setLowerLinLimit(10.0F);
-	//constraint->setUpperLinLimit(60.0f);	
-	//constraint->setPoweredLinMotor(true);
-
-	///*spSlider1->setTargetAngMotorVelocity(50.0f);
-	//spSlider1->setPoweredAngMotor(true);*/
-	//
-	////spSlider1->setEnabled(true);
-	//world->addConstraint(constraint, true);
-	//world->addRigidBody(body1);
-	//world->addRigidBody(body2);
-
-
-}
-
-btRigidBody* ModulePhysics3D::AddConstraintp2p() {
-
-	btCollisionShape* shape1 = new btBoxShape(btVector3(2.0f, 0.2f, 7.0f));
-	shapes.add(shape1);
-	btCollisionShape* shape2 = new btSphereShape(2.0f);
-	shapes.add(shape2);
-
-	btScalar mass = 1000;
-	btTransform frameInA;
-	frameInA = btTransform::getIdentity();
-	btVector3 localInertia;
-	shape2->calculateLocalInertia(mass, localInertia);
-
-	btRigidBody::btRigidBodyConstructionInfo fanInfo1(0.0f, 0, shape1, { 0,0,80 });
-	fanInfo1.m_startWorldTransform.setOrigin(btVector3(-76.0f, 15.0f, -44.0f));
-
-	btRigidBody::btRigidBodyConstructionInfo fanInfo2(500.0f, 0, shape2, { 100,0,0 });
-	fanInfo2.m_startWorldTransform.setOrigin(btVector3(-76.0f, 0.0f, -36.0f));
-
-	btRigidBody* body1 = new btRigidBody(fanInfo1);
-	btRigidBody* body2 = new btRigidBody(fanInfo2);
-
-	btTypedConstraint* p2p = new btPoint2PointConstraint(*body1, *body2, { 0,0,0 }, { 0,12.0f,0 });
-	
-	world->addConstraint(p2p);
-	world->addRigidBody(body1);
-	world->addRigidBody(body2);
-
-	return body2;
-}

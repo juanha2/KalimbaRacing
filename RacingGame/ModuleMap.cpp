@@ -6,10 +6,7 @@
 #include "PhysVehicle3D.h"
 ModuleMap::ModuleMap(bool start_enabled) : Module(start_enabled)
 {
-	//Set general values of Pillars and ramps
-	pillar_radius = 1.3f;
-	pillar_height = 3.0f;
-	pillar_mass = 0.0f;
+	
 }
 
 // Destructor
@@ -27,8 +24,13 @@ bool ModuleMap::Start()
 	App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
 	App->scene_intro->lap_time.Start();
 
+	//Floor creation
+	btVector3 sizeFloor = { 150.0f, 2.0f, 150.0f };
+	btVector3 posFloor = { 0.f, -2.f, 0.f };
+	CreateFloor(sizeFloor, posFloor);
+	//-----------------------------------------
 
-	//Array of pillar's coordinates
+	//Pillars Creation
 	float Map[928] = {
 0.509863f, 0.215500f,
 	0.509105f, 0.207500f,
@@ -497,73 +499,45 @@ bool ModuleMap::Start()
 
 
 	};
-	int size = 928;
-	vec2 dist_from_origin = { 115.0f,120.0f };
+	int sizeMap = 928;
+	vec2 dist_origin = { 115.0f,120.0f };
 
-	//Pillar Properties	
-	for (int i = 0; i < size / 2; i++)
+	for (int i = 0; i < sizeMap / 2; i++)
 	{
-		pillar[i].pillar_size = { pillar_radius, pillar_height, 1.0f };
+		pillar[i].pillar_size = { 1.3f, 3.0f, 1.0f };
 		pillar[i].pillars_pos = { Map[i * 2 + 0] * DISTANCE_X_RATIO,  1.7f,  Map[i * 2 + 1] * DISTANCE_Z_RATIO };
 	}
+	CreatePillars(pillar, sizeMap, dist_origin);
+	//-------------------------------------------
 
-	//First Ramp properties ---------------------
-	ramp[0].ramp_position = { 20.0f, 0.5f ,-44.0f };
-	ramp[0].ramp_size = { 1.0f, 24.0f ,21.0f };
+	//Ramps Creation
+	btVector3 sizeRamps = { 1.0f, 24.0f ,21.0f };
+	btVector3 posRamp1 = { 20.0f, 0.5f ,-44.0f };	
+	btVector3 posRamp2 = { -25.0f, 0.5f ,-44.0f };
+	float angleRamp = 85.0f;
 
-	//Second Ramp properties ---------------------
-	ramp[1].ramp_position = { -25.0f, 0.5f ,-44.0f };
-	ramp[1].ramp_size = { 1.0f, 24.0f ,21.0f };
+	CreateRamps(sizeRamps, posRamp1, angleRamp);
+	CreateRamps(sizeRamps, posRamp2, -angleRamp);
+	//----------------------------------------------
 
-	//Fan properties
+	//Fan Creation	
 	fan.fan_pos = { -68.0f, 10.0f, 70.0f };
 	fan.fan_size1 = { 25, 0.4f, 2.0f };
 	fan.fan_size2 = { 2.0f, 0.4f, 25.0f };
 	fan.joint_size = { 0.1, 0.025, 0.1 };
 	fan.rotation.setRotation(btVector3(1, 0, 0), 80);
+	fan.mass = 150;
+	Fan_body=CreateFan(fan);
+	//---------------------------------------------
 
-	//We create the bodies and their physics
-	App->physics->CreateMap(pillar, pillar_radius, size, dist_from_origin);
-	App->physics->CreateRamps(ramp);
-	Fan_body = App->physics->AddConstraintHinge(fan);
-	Wrecking_ball= App->physics->AddConstraintp2p();
-	
-	//Finally, we create their respective primitives in order to render	
-	for (int i = 0; i < size / 2; i++)
-	{
-		Cylinder* s = new Cylinder(pillar_radius * 0.5f, pillar_height, pillar_mass);
-		s->SetPos(pillar[i].pillars_pos.x - 115.0f, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z - 120.0f);
-		s->SetRotation(90.f, { 0.0f,0.0f,1.0f });
-
-		//We alternate color between pillars
-		if (i % 2 == 0)
-			s->color = Red;
-		else
-			s->color = White;
-
-		primitives.PushBack(s);
-	}
-
-	// Primitive of Ramp1
-	Cube* ramp1 = new Cube(vec3(ramp[0].ramp_size), 0.0f);
-	ramp1->SetPos(ramp[0].ramp_position.x, ramp[0].ramp_position.y, ramp[0].ramp_position.z);
-	ramp1->SetRotation(85.0f, { 0,0,1 });
-	ramp1->color = Cyan;
-	primitives.PushBack(ramp1);
-
-	// Primitive of Ramp2
-	Cube* ramp2 = new Cube(vec3(ramp[1].ramp_size), 0.0f);
-	ramp2->SetPos(ramp[1].ramp_position.x, ramp[1].ramp_position.y, ramp[1].ramp_position.z);
-	ramp2->SetRotation(-85.0f, { 0,0,1 });
-	ramp2->color = Cyan;
-	primitives.PushBack(ramp2);
-
-	// Primitive of Wrecking ball structure
-	Cube* base = new Cube(vec3(4.0f, 0.4f, 14.0f));
-	base->SetPos(-76.0f, 14.0f, -44.0f);
-	base->color = Cyan;
-	primitives.PushBack(base);	
-	Wrecking_ball->setAngularVelocity({ -8,0,0 });
+	//Wreckingball Creation
+	wreckingball.base_size = { 2.0f, 0.2f, 7.0f };
+	wreckingball.ball_size = 2.0f;	
+	wreckingball.base_pos = { -76.0f, 15.0f, -44.0f };
+	wreckingball.ball_pos = { -76.0f, 0.0f, -36.0f };
+	wreckingball.mass = 1000.0f;
+	wreckingball_body = CreateWreckingBall(wreckingball);
+	//----------------------------------------------	
 
 	//We create the waypoint sensors==============================================================
 	//TODO create the sensors from a function
@@ -633,6 +607,7 @@ bool ModuleMap::Start()
 	primitives.PushBack(cub4);
 	waypoints.PushBack(bod);
 	//____________________________
+
 	return ret;
 
 }
@@ -640,57 +615,47 @@ bool ModuleMap::Start()
 
 update_status ModuleMap::Update(float dt)
 {
-	//Rendering primitives of the Fan's 2 boxes
-	mat4x4 mat;
-	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
-
-	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, 1.0f);
-	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
-	c1.color = Green;
-	c1.SetRotation(80, { 1,0,0 });
-	c1.transform = mat;
-	c1.Render();
-
-	Cube c2({ fan.fan_size2.x,fan.fan_size2.y, fan.fan_size2.z }, 1.0f);
-	c2.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
-	c2.color = Green;
-	c2.SetRotation(80, { 1,0,0 });
-	c2.transform = mat;
-	c2.Render();
-	//-----------------------------------------------------
-	mat4x4 mat1;
-	Wrecking_ball->getWorldTransform().getOpenGLMatrix(mat1.M);
-
-	Sphere s1(2.0f, 1.0f);
-	s1.SetPos(8.0f, 0.0f, 10.0f);
-	s1.color = White;
-	s1.transform = mat1;
-	s1.Render();	
-
-	//TODO CREATE A FUNCTION
-	
-	if (Wrecking_ball->getCenterOfMassPosition().getY() > 13.0) {
-
-		if(Wrecking_ball->getCenterOfMassPosition().getZ() > -44)
-			Wrecking_ball->setAngularVelocity({ 90,0,0 });
-		if (Wrecking_ball->getCenterOfMassPosition().getZ() < -44)
-			Wrecking_ball->setAngularVelocity({ -90,0,0 });
-	}		
-	
 	for (uint n = 0; n < primitives.Count(); n++)
 		primitives[n]->Update();
-
+	
 	return UPDATE_CONTINUE;
 }
 
 // Update: draw background
 update_status ModuleMap::PostUpdate(float dt)
 {
-	//Rendering all primitives
+	//Rendering static primitives
 	for (uint n = 0; n < primitives.Count(); n++)
 	{
 		primitives[n]->Render();
 	}
+
+	//Rendering dynamic primitives
+	//Fan primitives
+	mat4x4 mat;
+	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
+
+	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, fan.mass);
+	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
+	c1.color = Green;
+	c1.SetRotation(fan.rotation.getX(), { fan.rotation.getY(), fan.rotation.getZ(), fan.rotation.getW()});
+	c1.transform = mat;
+	c1.Render();
+
+	Cube c2({ fan.fan_size2.x,fan.fan_size2.y, fan.fan_size2.z }, fan.mass);
+	c2.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
+	c2.color = Green;
+	c2.SetRotation(fan.rotation.getX(), { fan.rotation.getY(), fan.rotation.getZ(), fan.rotation.getW()});
+	c2.transform = mat;
+	c2.Render();
+
+	//Wreckingball primitive
+	mat4x4 mat1;
+	wreckingball_body->getWorldTransform().getOpenGLMatrix(mat1.M);
+	Sphere s1(wreckingball.ball_size, wreckingball.mass);	
+	s1.color = White;
+	s1.transform = mat1;
+	s1.Render();
 
 	return UPDATE_CONTINUE;
 }
@@ -699,12 +664,29 @@ update_status ModuleMap::PostUpdate(float dt)
 bool ModuleMap::CleanUp()
 {
 	LOG("Destroying map");
+
 	//TODO clean all the waypoints
 	for (int i = waypoints.Count() - 1; i >= 0; i--)
 	{
 		delete waypoints[i];
 	}
+
 	waypoints.Clear();
+
+	// Clear motions 
+	for (p2List_item<btDefaultMotionState*>* item = motions.getFirst(); item; item = item->next)
+		delete item->data;
+
+	motions.clear();
+
+	// Clear shapes 
+	for (p2List_item<btCollisionShape*>* item = shapes.getFirst(); item; item = item->next)
+		delete item->data;
+
+	shapes.clear();
+
+	primitives.Clear();
+
 	return true;
 }
 
@@ -761,10 +743,12 @@ int ModuleMap::GetLaps()
 {
 	return laps;
 }
+
 PhysBody3D* ModuleMap::GetLastWaypoint()
 {
 	return lastWaypoint;
 }
+
 void ModuleMap::ResetGame()
 {
 	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
@@ -780,3 +764,168 @@ void ModuleMap::ResetGame()
 	laps = 0;
 }
 
+void ModuleMap::CreateFloor(const btVector3 size, const btVector3 pos) {
+
+	// Big rectangle as ground
+	btCollisionShape* colShape = new btBoxShape(btVector3(size));
+	shapes.add(colShape);
+	mat4x4 glMatrix = IdentityMatrix;
+	glMatrix.translate(pos.getX(),pos.getY(),pos.getZ());
+	btTransform startTransform;
+	startTransform.setFromOpenGLMatrix(&glMatrix);
+
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	motions.add(myMotionState);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f, myMotionState, colShape);
+
+	btRigidBody* body = new btRigidBody(rbInfo);
+
+	App->physics->AddBodyToWorld(body);
+
+	//Floor primitive
+	Cube* floor = new Cube({ size.getX()*2 , size.getY() * 2, size.getZ() * 2 }, 0.0f);
+	floor->SetPos(pos.getX(), pos.getY(), pos.getZ());
+	floor->color = Gray;
+	primitives.PushBack(floor);
+}
+
+void ModuleMap::CreatePillars(const Pillars Pillar[], const int size, const vec2 dist_origin)
+{	
+	btCollisionShape* mapShape = new btCylinderShape(btVector3(pillar[0].pillar_size.x * 0.5f, pillar[0].pillar_size.y * 0.5f, pillar[0].pillar_size.z * 0.5f));
+	shapes.add(mapShape);
+
+	btTransform mapTrans;
+	mapTrans.setIdentity();
+	btDefaultMotionState* mapMotionState = new btDefaultMotionState(mapTrans);
+	motions.add(mapMotionState);
+	btRigidBody::btRigidBodyConstructionInfo mapInfo(0.0f, mapMotionState, mapShape, { 0,0,0 });
+
+	for (int i = 0; i < size / 2; i++)
+	{
+		btRigidBody* body = new btRigidBody(mapInfo);
+		body->getWorldTransform().setOrigin(btVector3(pillar[i].pillars_pos.x - dist_origin.x, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z - dist_origin.y));
+		App->physics->AddBodyToWorld(body);
+	}
+
+	//Primitives of pillars
+	for (int i = 0; i < size / 2; i++)
+	{
+		Cylinder* s = new Cylinder(1.3f * 0.5f, 3.0f, 0.0f);
+		s->SetPos(pillar[i].pillars_pos.x - 115.0f, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z - 120.0f);
+		s->SetRotation(90.f, { 0.0f,0.0f,1.0f });
+
+		//We alternate color between pillars
+		if (i % 2 == 0)
+			s->color = Red;
+		else
+			s->color = White;
+
+		primitives.PushBack(s);
+	}
+}
+
+void ModuleMap::CreateRamps(const btVector3 size, const btVector3 pos, const float angle)
+{
+	btCollisionShape* rampShape = new btBoxShape(btVector3(size.getX() * 0.5f, size.getY() * 0.5f, size.getZ() * 0.5f));
+	shapes.add(rampShape);
+
+	mat4x4 rampMatrix = IdentityMatrix;
+	rampMatrix.translate(pos.getX(), pos.getY(), pos.getZ());
+	rampMatrix.rotate(angle, { 0,0,1 });
+	btTransform rampTransform;
+	rampTransform.setFromOpenGLMatrix(&rampMatrix);
+
+	btDefaultMotionState* rampMotionState = new btDefaultMotionState(rampTransform);
+	motions.add(rampMotionState);
+	btRigidBody::btRigidBodyConstructionInfo rampInfo(0.0f, rampMotionState, rampShape);
+
+	btRigidBody* body = new btRigidBody(rampInfo);
+	App->physics->AddBodyToWorld(body);
+
+	// Primitive of Ramp1
+	Cube* ramp1 = new Cube(vec3(size.getX(), size.getY(), size.getZ()), 0.0f);
+	ramp1->SetPos(pos.getX(), pos.getY(), pos.getZ());
+	ramp1->SetRotation(angle, { 0,0,1 });
+	ramp1->color = Cyan;
+	primitives.PushBack(ramp1);
+}
+
+btRigidBody* ModuleMap::CreateFan(Fan fan) {
+		
+	btCollisionShape* shape1 = new btBoxShape(btVector3(fan.fan_size1.x * 0.5f, fan.fan_size1.y * 0.5f, fan.fan_size1.z * 0.5f));
+	shapes.add(shape1);
+	btCollisionShape* shape2 = new btCylinderShape(btVector3(fan.joint_size.x, fan.joint_size.y, fan.joint_size.z));
+	shapes.add(shape2);
+	btCollisionShape* shape3 = new btBoxShape(btVector3(fan.fan_size2.x * 0.5f, fan.fan_size2.y * 0.5f, fan.fan_size2.z * 0.5f));
+	shapes.add(shape3);
+
+	btCompoundShape* fanShape = new btCompoundShape();
+	fanShape->addChildShape(btTransform::getIdentity(), shape1);
+	fanShape->addChildShape(btTransform::getIdentity(), shape2);
+	fanShape->addChildShape(btTransform::getIdentity(), shape3);
+	shapes.add(fanShape);
+	
+	btVector3 localInertia;
+	fanShape->calculateLocalInertia(fan.mass, localInertia);
+
+	btRigidBody::btRigidBodyConstructionInfo fanInfo(fan.mass, 0, fanShape, localInertia);
+	fanInfo.m_startWorldTransform.setOrigin(btVector3(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z));
+	fanInfo.m_startWorldTransform.setRotation(fan.rotation);
+
+	btRigidBody* body = new btRigidBody(fanInfo);
+	App->physics->AddBodyToWorld(body);
+	body->setLinearFactor(btVector3(0, 0, 0));
+	
+	btHingeConstraint* hinge = App->physics->AddConstraintHinge(body, btVector3(0, 0, 0), btVector3(0, 1, 0), true);	
+	hinge->enableAngularMotor(true, -2.0f, 500);
+
+	return body;
+}
+
+btRigidBody* ModuleMap::CreateWreckingBall(WreckingBall wreckingball) 
+{
+	btCollisionShape* shape1 = new btBoxShape(wreckingball.base_size);
+	shapes.add(shape1);
+	btCollisionShape* shape2 = new btSphereShape(wreckingball.ball_size);
+	shapes.add(shape2);
+
+	btTransform frameInA;
+	frameInA = btTransform::getIdentity();
+	btVector3 localInertia;
+	shape2->calculateLocalInertia(wreckingball.mass, localInertia);
+
+	btRigidBody::btRigidBodyConstructionInfo baseInfo(0.0f, 0, shape1, localInertia);
+	baseInfo.m_startWorldTransform.setOrigin(wreckingball.base_pos);
+
+	btRigidBody::btRigidBodyConstructionInfo ballInfo(500.0f, 0, shape2, { 100,0,0 });
+	ballInfo.m_startWorldTransform.setOrigin(wreckingball.ball_pos);
+
+	btRigidBody* body1 = new btRigidBody(baseInfo);
+	btRigidBody* body2 = new btRigidBody(ballInfo);
+	body2->setAngularVelocity({-8,0,0 });
+
+	App->physics->AddBodyToWorld(body1);
+	App->physics->AddBodyToWorld(body2);
+
+	btTypedConstraint* p2p = App->physics->AddConstraintP2P(body1, body2, { 0,0,0 }, { 0,12.0f,0 });
+	
+	// Primitive of Wrecking ball base
+	Cube* base = new Cube(vec3(wreckingball.base_size.getX()*2, wreckingball.base_size.getY() * 2, wreckingball.base_size.getZ() * 2));
+	base->SetPos(wreckingball.base_pos.getX(), wreckingball.base_pos.getY(), wreckingball.base_pos.getZ());
+	base->color = Cyan;
+	primitives.PushBack(base);	
+
+	return body2;
+}
+
+void ModuleMap::WreckingBallMovement() {
+
+	if (wreckingball_body->getCenterOfMassPosition().getY() > 13.0) {
+
+		if (wreckingball_body->getCenterOfMassPosition().getZ() > -44)
+			wreckingball_body->setAngularVelocity({ 90,0,0 });
+		if (wreckingball_body->getCenterOfMassPosition().getZ() < -44)
+			wreckingball_body->setAngularVelocity({ -90,0,0 });
+	}
+
+}
