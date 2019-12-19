@@ -112,8 +112,9 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 		sprintf_s(title, "%.1f Km/h || VICTORY!", App->player->vehicle->GetKmh());
 	}
 	else
-	sprintf_s(title, "%.1f Km/h || Total Laps: %i", App->player->vehicle->GetKmh(),App->map->GetLaps());
-	
+	{
+		sprintf_s(title, "%.1f Km/h || Total Laps: %i || Lap Time: %.2f || Best Lap Time: %.2f", App->player->vehicle->GetKmh(), App->map->GetLaps(), lap_time.Read() * 0.001f,best_lap_time);
+	}
 	App->window->SetTitle(title);
 
 
@@ -127,5 +128,12 @@ void ModuleSceneIntro::OnCollision(PhysBody3D * body1, PhysBody3D * body2)
 
 	body1->parentPrimitive->color = color;
 	body2->parentPrimitive->color = color;
+
+}
+
+void ModuleSceneIntro::CalculateBestLap(Timer* lap_time)
+{
+	float newtime = lap_time->Read() * 0.001f;
+	if (newtime < best_lap_time||best_lap_time==0.00f)best_lap_time = newtime;
 
 }

@@ -24,6 +24,9 @@ bool ModuleMap::Start()
 	
 	memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 	waypoint_flags[0] = true;//sets the start waypoint to true
+	App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
+	App->scene_intro->lap_time.Start();
+
 
 	//Array of pillar's coordinates
 	float Map[928] = {
@@ -727,7 +730,8 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 			{
 				memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 				laps++;
-			
+				App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
+				App->scene_intro->lap_time.Start();
 				App->audio->PlayFx(1);
 				lastWaypoint = body;
 				waypoint_flags[0] = true;
@@ -772,6 +776,7 @@ void ModuleMap::ResetGame()
 	lastWaypoint = waypoints[0];
 	waypoint_flags[0] = true;
 	App->player->TpToLastWaypoint();
+	App->scene_intro->lap_time.Start();
 	laps = 0;
 }
 

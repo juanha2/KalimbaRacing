@@ -191,6 +191,7 @@ update_status ModulePlayer::Update(float dt)
 	if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_DOWN)
 	{
 		App->map->ResetGame();
+
 	}
 
 	
