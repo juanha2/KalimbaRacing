@@ -105,12 +105,16 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 
 	char title[250];
 	if (App->map->GetLaps() >= 3)
-	{
-		App->audio->PlayFx(3);
+	{		
+		if (!victory_played) {
+			App->audio->PlayFx(3);
+			victory_played = true;
+		}		
 		sprintf_s(title, "%.1f Km/h || VICTORY!", App->player->vehicle->GetKmh());
 	}
 	else
 	{
+		victory_played = false;
 		sprintf_s(title, "%.1f Km/h || Total Laps: %i || Lap Time: %.2f || Best Lap Time: %.2f", App->player->vehicle->GetKmh(), App->map->GetLaps(), lap_time.Read() * 0.001f,best_lap_time);
 	}
 	App->window->SetTitle(title);
