@@ -1,4 +1,4 @@
-# RacingGame
+# KalimbaRacing
 
 Members of the project team:
 
