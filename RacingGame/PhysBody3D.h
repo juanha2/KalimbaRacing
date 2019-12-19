@@ -44,7 +44,7 @@ private:
 	btCollisionShape* colShape;
 	btDefaultMotionState* motionState;
 
-	bool is_sensor=false;
+	bool is_sensor;
 public:
 	Primitive* parentPrimitive;
 	p2DynArray<Module*> collision_listeners;

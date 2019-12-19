@@ -24,13 +24,16 @@ public:
 
 
 public:
+
 	Timer lap_time;
-	float best_lap_time=0.0f;
+	float best_lap_time;
 
 private:
+
 	void HandleDebugInput();
 	void DebugSpawnPrimitive(Primitive* p);
 
-	bool victory_played = false;
+	bool victory_played;
+
 	p2DynArray<Primitive*> primitives;
 };

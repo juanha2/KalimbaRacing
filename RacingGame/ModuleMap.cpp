@@ -4,9 +4,9 @@
 #include "Primitive.h"
 #include "PhysBody3D.h"
 #include "PhysVehicle3D.h"
+
 ModuleMap::ModuleMap(bool start_enabled) : Module(start_enabled)
-{
-	
+{	
 }
 
 // Destructor
@@ -526,30 +526,28 @@ bool ModuleMap::Start()
 	fan.joint_size = { 0.1, 0.025, 0.1 };
 	fan.rotation.setRotation(btVector3(1, 0, 0), 80);
 	fan.mass = 150;
-	Fan_body=CreateFan(fan);
+	fan.body=CreateFan(fan);
 	//---------------------------------------------
 
 	//Wreckingball Creation
-	wreckingball.base_size = { 2.0f, 0.2f, 7.0f };
-	wreckingball.ball_size = 2.0f;	
-	wreckingball.base_pos = { -76.0f, 15.0f, -44.0f };
-	wreckingball.ball_pos = { -76.0f, 0.0f, -36.0f };
-	wreckingball.mass = 1000.0f;
-	wreckingball_body = CreateWreckingBall(wreckingball);
+	wrecking_ball.base_size = { 2.0f, 0.2f, 7.0f };
+	wrecking_ball.ball_size = 2.0f;	
+	wrecking_ball.base_pos = { -76.0f, 15.0f, -44.0f };
+	wrecking_ball.ball_pos = { -76.0f, 0.0f, -36.0f };
+	wrecking_ball.mass = 1000.0f;
+	wrecking_ball.body = CreateWreckingBall(wrecking_ball);
 	//----------------------------------------------	
 
-	//We create the waypoint sensors==============================================================
-	lastWaypoint = CreateSensor({ -2.f, 7.5f, -6.f }, { -2.f, 4.5f, 0.f }, { 12.0f,5.0f,1.0f },180.f);
+	//We create the waypoint sensors
+	last_waypoint = CreateSensor({ -2.f, 7.5f, -6.f }, { -2.f, 4.5f, 0.f }, { 12.0f,5.0f,1.0f },180.f);
 	CreateSensor({ 41.0f, 7.5f, -108.5f }, { 35.0f, 4.5f, -108.5f }, { 9.0f,5.0f,1.0f },-90);
 	CreateSensor({ -56, 7.5f, -44.f }, { -50, 4.5f, -44.f }, { 12.0f,5.0f,1.0f }, 90);
-	CreateSensor({ -29, 7.5f, 109.f }, { -35, 4.5f, 109.f }, { 15.0f,5.0f,1.0f }, -90);
-	
-	//____________________________
+	CreateSensor({ -29, 7.5f, 109.f }, { -35, 4.5f, 109.f }, { 15.0f,5.0f,1.0f }, -90);	
+	//-----------------------------------------------
 
 	return ret;
 
 }
-
 
 update_status ModuleMap::Update(float dt)
 {
@@ -572,7 +570,7 @@ update_status ModuleMap::PostUpdate(float dt)
 
 	//Fan primitives
 	mat4x4 mat;
-	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
+	fan.body->getWorldTransform().getOpenGLMatrix(mat.M);
 
 	Cube c1({ fan.fan_size1.x,fan.fan_size1.y, fan.fan_size1.z }, fan.mass);
 	c1.SetPos(fan.fan_pos.x, fan.fan_pos.y, fan.fan_pos.z);
@@ -590,8 +588,8 @@ update_status ModuleMap::PostUpdate(float dt)
 
 	//Wreckingball primitive
 	mat4x4 mat1;
-	wreckingball_body->getWorldTransform().getOpenGLMatrix(mat1.M);
-	Sphere s1(wreckingball.ball_size, wreckingball.mass);	
+	wrecking_ball.body->getWorldTransform().getOpenGLMatrix(mat1.M);
+	Sphere s1(wrecking_ball.ball_size, wrecking_ball.mass);	
 	s1.color = White;
 	s1.transform = mat1;
 	s1.Render();
@@ -623,12 +621,13 @@ bool ModuleMap::CleanUp()
 		delete item->data;
 
 	shapes.clear();
-
+	
 	primitives.Clear();
 
 	return true;
 }
 
+// Detects sensors' collisions and updates the waypoints
 void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 {
 	PhysBody3D* body;
@@ -636,7 +635,7 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 		body = body1;
 	else body = body2;
 
-	if (body != lastWaypoint)//only executes code if the last waypoint visited is not the current one
+	if (body != last_waypoint)//only executes code if the last waypoint visited is not the current one
 	{
 		int i;
 		for (i = 0; i < waypoints.Count(); i++)//determines the id of whe current waypoint
@@ -653,7 +652,7 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 				laps++;
 				App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
 				App->scene_intro->lap_time.Start();				
-				lastWaypoint = body;
+				last_waypoint = body;
 				waypoint_flags[0] = true;
 				App->audio->PlayFx(1);
 				for (int i = 0; i < waypoints.Count(); i++) {
@@ -670,7 +669,7 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 				App->audio->PlayFx(2);
 				body->parentPrimitive->color = Green;
 				waypoint_flags[i] = true;
-				lastWaypoint = body;
+				last_waypoint = body;
 			}
 		}
 
@@ -678,14 +677,14 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 	
 }
 
-int ModuleMap::GetLaps()
+int ModuleMap::GetLaps() const
 {
 	return laps;
 }
 
-PhysBody3D* ModuleMap::GetLastWaypoint()
+PhysBody3D* ModuleMap::GetLastWaypoint() const
 {
-	return lastWaypoint;
+	return last_waypoint;
 }
 
 void ModuleMap::ResetGame()
@@ -696,14 +695,14 @@ void ModuleMap::ResetGame()
 		waypoints[i]->parentPrimitive->color = White;
 
 	}
-	lastWaypoint = waypoints[0];
+	last_waypoint = waypoints[0];
 	waypoint_flags[0] = true;
 	App->player->TpToLastWaypoint();
 	App->scene_intro->lap_time.Start();
 	laps = 0;
 }
 
-void ModuleMap::CreateFloor(const btVector3 size, const btVector3 pos) {
+btRigidBody* ModuleMap::CreateFloor(const btVector3 size, const btVector3 pos) {
 
 	// Big rectangle as ground
 	btCollisionShape* colShape = new btBoxShape(btVector3(size));
@@ -726,9 +725,11 @@ void ModuleMap::CreateFloor(const btVector3 size, const btVector3 pos) {
 	floor->SetPos(pos.getX(), pos.getY(), pos.getZ());
 	floor->color = Gray;
 	primitives.PushBack(floor);
+
+	return(body);
 }
 
-void ModuleMap::CreatePillars(const Pillars Pillar[], const int size, const vec2 dist_origin)
+btRigidBody* ModuleMap::CreatePillars(const Pillars Pillar[], const int size, const vec2 dist_origin)
 {	
 	btCollisionShape* mapShape = new btCylinderShape(btVector3(pillar[0].pillar_size.x * 0.5f, pillar[0].pillar_size.y * 0.5f, pillar[0].pillar_size.z * 0.5f));
 	shapes.add(mapShape);
@@ -739,9 +740,10 @@ void ModuleMap::CreatePillars(const Pillars Pillar[], const int size, const vec2
 	motions.add(mapMotionState);
 	btRigidBody::btRigidBodyConstructionInfo mapInfo(0.0f, mapMotionState, mapShape, { 0,0,0 });
 
+	btRigidBody* body = nullptr;
 	for (int i = 0; i < size / 2; i++)
 	{
-		btRigidBody* body = new btRigidBody(mapInfo);
+		body = new btRigidBody(mapInfo);
 		body->getWorldTransform().setOrigin(btVector3(pillar[i].pillars_pos.x - dist_origin.x, pillar[i].pillars_pos.y, pillar[i].pillars_pos.z - dist_origin.y));
 		App->physics->AddBodyToWorld(body);
 	}
@@ -761,9 +763,11 @@ void ModuleMap::CreatePillars(const Pillars Pillar[], const int size, const vec2
 
 		primitives.PushBack(s);
 	}
+
+	return(body);
 }
 
-void ModuleMap::CreateRamps(const btVector3 size, const btVector3 pos, const float angle)
+btRigidBody* ModuleMap::CreateRamps(const btVector3 size, const btVector3 pos, const float angle)
 {
 	btCollisionShape* rampShape = new btBoxShape(btVector3(size.getX() * 0.5f, size.getY() * 0.5f, size.getZ() * 0.5f));
 	shapes.add(rampShape);
@@ -781,12 +785,14 @@ void ModuleMap::CreateRamps(const btVector3 size, const btVector3 pos, const flo
 	btRigidBody* body = new btRigidBody(rampInfo);
 	App->physics->AddBodyToWorld(body);
 
-	// Primitive of Ramp1
+	// Primitive
 	Cube* ramp1 = new Cube(vec3(size.getX(), size.getY(), size.getZ()), 0.0f);
 	ramp1->SetPos(pos.getX(), pos.getY(), pos.getZ());
 	ramp1->SetRotation(angle, { 0,0,1 });
 	ramp1->color = Cyan;
 	primitives.PushBack(ramp1);
+
+	return(body);
 }
 
 btRigidBody* ModuleMap::CreateFan(Fan fan) {
@@ -856,19 +862,6 @@ btRigidBody* ModuleMap::CreateWreckingBall(WreckingBall wreckingball)
 
 	return body2;
 }
-
-void ModuleMap::WreckingBallMovement() {
-
-	if (wreckingball_body->getCenterOfMassPosition().getY() > 13.0) {
-
-		if (wreckingball_body->getCenterOfMassPosition().getZ() > -44)
-			wreckingball_body->setAngularVelocity({ 90,0,0 });
-		if (wreckingball_body->getCenterOfMassPosition().getZ() < -44)
-			wreckingball_body->setAngularVelocity({ -90,0,0 });
-	}
-
-}
-
 
 //this function creates a sensor/waypoint
 //the rigid body rotation takes the Up axis as the rotation axis

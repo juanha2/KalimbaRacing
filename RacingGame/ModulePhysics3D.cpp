@@ -51,9 +51,7 @@ bool ModulePhysics3D::Start()
 
 	world = new btDiscreteDynamicsWorld(dispatcher, broad_phase, solver, collision_conf);
 	world->setDebugDrawer(debug_draw);
-	world->setGravity(GRAVITY);
-
-	
+	world->setGravity(GRAVITY);	
 
 	//Vehicle inicializations
 	vehicle_raycaster = new btDefaultVehicleRaycaster(world);
@@ -234,7 +232,6 @@ PhysVehicle3D* ModulePhysics3D::AddVehicle(const VehicleInfo& info)
 	mainTrans.setOrigin(btVector3(info.chassis[0].chassis_offset.x, info.chassis[0].chassis_offset.y, info.chassis[0].chassis_offset.z));
 
 	comShape->addChildShape(mainTrans, mainShape);
-
 	
 	//Creation of the cabin Shape ---------------------
 	btCollisionShape* cabinShape = new btBoxShape(btVector3(info.chassis[1].chassis_size.x * 0.5f, info.chassis[1].chassis_size.y * 0.5f, info.chassis[1].chassis_size.z * 0.5f));

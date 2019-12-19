@@ -127,7 +127,6 @@ bool ModulePlayer::Start()
 
 	vehicle = App->physics->AddVehicle(car);
 	vehicle->SetPos(0, 0.5f, 0);
-	
 
 	return true;
 }
@@ -171,6 +170,7 @@ update_status ModulePlayer::Update(float dt)
 		if (turn > -TURN_DEGREES)
 			turn -= TURN_DEGREES*dt*2;
 	}
+
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT&&vehicle->GetKmh()>-30.0f)//only apply acceleration if vehicle is above -30 km/h
 	{
 		if (vehicle->GetKmh() > 0.0f)//if its going forward first brake
@@ -180,31 +180,23 @@ update_status ModulePlayer::Update(float dt)
 		acceleration = -0.5*MAX_ACCELERATION;
 	}
 	
-	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_REPEAT)
-	{
+	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_REPEAT)	
 		brake = BRAKE_POWER;
-	}
-	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
-	{
+	
+	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)	
 		TpToLastWaypoint();
-	}
-	if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_DOWN)
-	{
-		App->map->ResetGame();
-
-	}
-
+	
+	if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_DOWN)	
+		App->map->ResetGame();	
 	
 	vehicle->ApplyEngineForce(acceleration);
 	vehicle->Turn(turn);
 	vehicle->Brake(brake);
 
-	
 	vehicle->Render();	
 
 	return UPDATE_CONTINUE;
 }
-
 
 void ModulePlayer::TpToLastWaypoint()
 {

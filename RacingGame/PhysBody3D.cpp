@@ -12,6 +12,7 @@ PhysBody3D::PhysBody3D()
 	, motionState(nullptr)
 	, parentPrimitive(nullptr)
 	, collision_listeners()
+	, is_sensor(false)
 {
 	
 }
@@ -21,6 +22,7 @@ PhysBody3D::PhysBody3D(btRigidBody*body)
 	, motionState(nullptr)
 	, parentPrimitive(nullptr)
 	, collision_listeners()
+	, is_sensor(false)
 {
 
 }
@@ -43,17 +45,41 @@ void PhysBody3D::SetBody(Sphere* primitive, float mass)
 		primitive, mass);
 }
 
+void PhysBody3D::SetBody(btCollisionShape* shape, Primitive* parent, float mass)
+{
+	assert(HasBody() == false);
+
+	parentPrimitive = parent;
+
+	colShape = shape;
+
+	btTransform startTransform;
+	startTransform.setFromOpenGLMatrix(&parent->transform);
+
+	btVector3 localInertia(0, 0, 0);
+	if (mass != 0.f)
+		colShape->calculateLocalInertia(mass, localInertia);
+
+	motionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, colShape, localInertia);
+
+	body = new btRigidBody(rbInfo);
+
+	body->setUserPointer(this);
+
+	App->physics->AddBodyToWorld(body);
+}
+
 bool PhysBody3D::HasBody() const
 {
 	return body != nullptr;
 }
 
-btRigidBody * PhysBody3D::GetBody() const
+btRigidBody* PhysBody3D::GetBody() const
 {
 	return body;
 }
 
-// ---------------------------------------------------------
 void PhysBody3D::GetTransform(float* matrix) const
 {
 	if (HasBody() == false)
@@ -62,7 +88,6 @@ void PhysBody3D::GetTransform(float* matrix) const
 	body->getWorldTransform().getOpenGLMatrix(matrix);
 }
 
-// ---------------------------------------------------------
 void PhysBody3D::SetTransform(const float* matrix) const
 {
 	if (HasBody() == false)
@@ -74,7 +99,6 @@ void PhysBody3D::SetTransform(const float* matrix) const
 	body->activate();
 }
 
-// ---------------------------------------------------------
 void PhysBody3D::SetPos(float x, float y, float z)
 {
 	if (HasBody() == false)
@@ -105,31 +129,6 @@ void PhysBody3D::Stop()
 {
 	if (HasBody())
 		body->clearForces();
-}
-
-void PhysBody3D::SetBody(btCollisionShape * shape, Primitive* parent, float mass)
-{
-	assert(HasBody() == false);
-
-	parentPrimitive = parent;
-
-	colShape = shape;
-
-	btTransform startTransform;
-	startTransform.setFromOpenGLMatrix(&parent->transform);
-
-	btVector3 localInertia(0, 0, 0);
-	if (mass != 0.f)
-		colShape->calculateLocalInertia(mass, localInertia);
-
-	motionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, colShape, localInertia);
-
-	body = new btRigidBody(rbInfo);
-
-	body->setUserPointer(this);
-
-	App->physics->AddBodyToWorld(body);
 }
 
 void PhysBody3D::SetAsSensor(bool is_sensor)

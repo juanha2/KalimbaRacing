@@ -9,6 +9,8 @@
 
 ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
 {	
+	best_lap_time = 0.0f;
+	victory_played = false;
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -22,10 +24,12 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));	
+
+	//Loading Audio
 	App->audio->PlayMusic("Audio/music.ogg", 4.0f);
-	App->audio->LoadFx("Audio/lap.wav");
-	App->audio->LoadFx("Audio/checkpoint.wav");
-	App->audio->LoadFx("Audio/win.wav");
+	App->audio->LoadFx("Audio/lap.wav");			//1
+	App->audio->LoadFx("Audio/checkpoint.wav");		//2
+	App->audio->LoadFx("Audio/win.wav");			//3
 	
 	return ret;
 }
@@ -83,7 +87,6 @@ void ModuleSceneIntro::DebugSpawnPrimitive(Primitive * p)
 // Update
 update_status ModuleSceneIntro::Update(float dt)
 {
-	//TODO move the camera debug mode to the handle inmput function, jsut activate the camera debug property when in debug
 	if (App->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN)
 		App->camera->debugcamera = !App->camera->debugcamera;
 
@@ -103,6 +106,7 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 		primitives[n]->Render();
 	}
 
+	//Sets the title information 
 	char title[250];
 	if (App->map->GetLaps() >= 3)
 	{		
@@ -135,5 +139,4 @@ void ModuleSceneIntro::CalculateBestLap(Timer* lap_time)
 {
 	float newtime = lap_time->Read() * 0.001f;
 	if (newtime < best_lap_time||best_lap_time==0.00f)best_lap_time = newtime;
-
 }

@@ -21,9 +21,9 @@ struct Fan
 	vec3 fan_size1;
 	vec3 fan_size2;
 	vec3 joint_size;
-	int	mass;
-
+	int	mass;	
 	btQuaternion rotation;
+	btRigidBody* body;
 };
 
 struct WreckingBall
@@ -33,6 +33,7 @@ struct WreckingBall
 	btVector3 ball_pos;	
 	btScalar ball_size; //Radius
 	btScalar mass;	
+	btRigidBody* body;
 };
 
 class ModuleMap : public Module
@@ -50,37 +51,32 @@ public:
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override; //TODO why override?
 
-	int GetLaps();
+	int GetLaps() const;
 	void ResetGame();
-	PhysBody3D* GetLastWaypoint();
+	PhysBody3D* GetLastWaypoint() const;
 
-	void CreateFloor(const btVector3 size, const btVector3 pos);
-	void CreatePillars(const Pillars pillar_info[], const int size, const vec2 dist_origin);
-	void CreateRamps(const btVector3 size, const btVector3 pos, const float angle);
+	btRigidBody* CreateFloor(const btVector3 size, const btVector3 pos);
+	btRigidBody* CreatePillars(const Pillars pillar_info[], const int size, const vec2 dist_origin);
+	btRigidBody* CreateRamps(const btVector3 size, const btVector3 pos, const float angle);
 	btRigidBody* CreateFan(Fan fan);
 	btRigidBody* CreateWreckingBall(WreckingBall wreckingball);
-
-	PhysBody3D* CreateSensor(vec3 shapePos, vec3 rbPos, btVector3 rbHalfDimensions, float rbRotation);
-	void WreckingBallMovement();	
+	PhysBody3D*  CreateSensor(vec3 shapePos, vec3 rbPos, btVector3 rbHalfDimensions, float rbRotation);
 	
 private:
 
 	Pillars pillar[928];	
 	Fan fan;
-	WreckingBall wreckingball;	
-
-	btRigidBody* Fan_body;
-	btRigidBody* wreckingball_body;	
+	WreckingBall wrecking_ball;	
 	
-	PhysBody3D* lastWaypoint;
+	PhysBody3D* last_waypoint;
 	bool  waypoint_flags[4];
 	int laps=0;
 
-	//New Lists
 	p2List<btDefaultMotionState*>		motions;
 	p2List<btCollisionShape*>			shapes;
-	p2DynArray<Primitive*> primitives;
-	p2DynArray<PhysBody3D*> waypoints;
+
+	p2DynArray<Primitive*>				primitives;
+	p2DynArray<PhysBody3D*>				waypoints;
 
 };
 
