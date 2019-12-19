@@ -631,6 +631,7 @@ update_status ModuleMap::PostUpdate(float dt)
 	}
 
 	//Rendering dynamic primitives
+
 	//Fan primitives
 	mat4x4 mat;
 	Fan_body->getWorldTransform().getOpenGLMatrix(mat.M);
@@ -713,11 +714,10 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 				memset(waypoint_flags, 0, sizeof(waypoint_flags));//starts the waypoint array from 0
 				laps++;
 				App->scene_intro->CalculateBestLap(&App->scene_intro->lap_time);
-				App->scene_intro->lap_time.Start();
-				App->audio->PlayFx(1);
+				App->scene_intro->lap_time.Start();				
 				lastWaypoint = body;
 				waypoint_flags[0] = true;
-
+				App->audio->PlayFx(1);
 				for (int i = 0; i < waypoints.Count(); i++) {
 					waypoints[i]->parentPrimitive->color = White;
 				}
@@ -729,6 +729,7 @@ void ModuleMap::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 		{
 			if (waypoint_flags[i - 1] == true)
 			{
+				App->audio->PlayFx(2);
 				body->parentPrimitive->color = Green;
 				waypoint_flags[i] = true;
 				lastWaypoint = body;

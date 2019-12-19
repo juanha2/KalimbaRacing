@@ -8,8 +8,7 @@
 #include "ModuleAudio.h"
 
 ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
-{
-	
+{	
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -23,8 +22,10 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));	
-	//App->audio->PlayMusic("Audio/music.ogg", 4.0f);
+	App->audio->PlayMusic("Audio/music.ogg", 4.0f);
 	App->audio->LoadFx("Audio/lap.wav");
+	App->audio->LoadFx("Audio/checkpoint.wav");
+	App->audio->LoadFx("Audio/win.wav");
 	
 	return ret;
 }
@@ -105,6 +106,7 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 	char title[250];
 	if (App->map->GetLaps() >= 3)
 	{
+		App->audio->PlayFx(3);
 		sprintf_s(title, "%.1f Km/h || VICTORY!", App->player->vehicle->GetKmh());
 	}
 	else
@@ -112,8 +114,6 @@ update_status ModuleSceneIntro::PostUpdate(float dt)
 		sprintf_s(title, "%.1f Km/h || Total Laps: %i || Lap Time: %.2f || Best Lap Time: %.2f", App->player->vehicle->GetKmh(), App->map->GetLaps(), lap_time.Read() * 0.001f,best_lap_time);
 	}
 	App->window->SetTitle(title);
-
-
 
 	return UPDATE_CONTINUE;
 }

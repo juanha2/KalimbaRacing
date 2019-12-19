@@ -12,7 +12,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 	Y = vec3(0.0f, 1.0f, 0.0f);
 	Z = vec3(0.0f, 0.0f, 1.0f);
 
-	Position = vec3(-200.0f, 100.0f, 300.0f);
+	Position = vec3(0.0f, 250.0f,50.0f);
 	Reference = vec3(0.0f, 0.0f, 0.0f);
 }
 
@@ -24,7 +24,7 @@ bool ModuleCamera3D::Start()
 {
 	LOG("Setting up the camera");
 	bool ret = true;
-	debugcamera = true;
+	debugcamera = false;
 
 	return ret;
 }
@@ -101,7 +101,6 @@ update_status ModuleCamera3D::Update(float dt)
 	}
 	else
 	{
-
 		//actual driving camera
 		//the camera has a focus point that is an imaginary point in front of the car
 		//it also has a target position that the camera wants to be in that is behind the car

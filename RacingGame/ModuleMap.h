@@ -59,13 +59,13 @@ public:
 	void CreateRamps(const btVector3 size, const btVector3 pos, const float angle);
 	btRigidBody* CreateFan(Fan fan);
 	btRigidBody* CreateWreckingBall(WreckingBall wreckingball);
-	void WreckingBallMovement();
+	void WreckingBallMovement();	
 	
 private:
 
 	Pillars pillar[928];	
 	Fan fan;
-	WreckingBall wreckingball;
+	WreckingBall wreckingball;	
 
 	btRigidBody* Fan_body;
 	btRigidBody* wreckingball_body;	
